@@ -37,7 +37,7 @@ class Octopus(object):
             url, handler = self.url_queue.get()
 
             response = requests.get(url)
-            handler(response)
+            handler(url, response)
 
             self.url_queue.task_done()
 
