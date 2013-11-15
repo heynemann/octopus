@@ -1,0 +1,16 @@
+language: python
+python:
+  - "2.7"
+  - "3.3"
+  - "pypy"
+
+install:
+  # install python requirements
+  - pip install coveralls
+  - pip install -e .[tests]
+
+script:
+  - make test
+
+after_success:
+  - coveralls
