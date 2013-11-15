@@ -7,6 +7,8 @@ from threading import Thread
 import requests
 from six.moves import queue
 
+from octopus.cache import Cache
+
 
 class TimeoutError(RuntimeError):
     pass
@@ -28,9 +30,12 @@ class OctopusQueue(queue.Queue):
 
 
 class Octopus(object):
-    def __init__(self, concurrency=10, auto_start=False):
+    def __init__(self, concurrency=10, auto_start=False, cache=False, expiration_in_seconds=30):
         self.concurrency = concurrency
         self.auto_start = auto_start
+
+        self.cache = cache
+        self.response_cache = Cache(expiration_in_seconds=expiration_in_seconds)
 
         self.url_queue = OctopusQueue()
 
@@ -38,6 +43,12 @@ class Octopus(object):
             self.start()
 
     def enqueue(self, url, handler):
+        if self.cache:
+            response = self.response_cache.get(url)
+            if response is not None:
+                handler(url, response)
+                return
+
         self.url_queue.put_nowait((url, handler))
 
     @property

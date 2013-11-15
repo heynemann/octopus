@@ -2,7 +2,7 @@ test:
 	@coverage run --branch `which nosetests` -vv --with-yanc -s tests/
 	@coverage report -m --fail-under=90
 
-coverage-html: unit
+coverage-html: test
 	@coverage html -d cover
 
 tox:

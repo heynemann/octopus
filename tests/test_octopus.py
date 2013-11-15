@@ -4,6 +4,7 @@
 import sys
 
 from preggy import expect
+from mock import Mock
 
 from octopus import Octopus, TimeoutError
 from tests import TestCase
@@ -18,6 +19,7 @@ class TestOctopus(TestCase):
         otto = Octopus(concurrency=20)
         expect(otto.concurrency).to_equal(20)
         expect(otto.auto_start).to_be_false()
+        expect(otto.cache).to_be_false()
 
     def test_has_default_concurrency(self):
         otto = Octopus()
@@ -101,3 +103,35 @@ class TestOctopus(TestCase):
         for url in urls:
             expect(self.responses).to_include(url)
             expect(self.responses[url].status_code).to_equal(200)
+
+    def test_can_handle_cached_responses(self):
+        response = Mock(status_code=200, body="whatever")
+
+        url = 'http://www.google.com'
+        otto = Octopus(concurrency=1, cache=True)
+        otto.response_cache.put(url, response)
+
+        def handle_url_response(url, response):
+            self.response = response
+
+        otto.enqueue(url, handle_url_response)
+
+        expect(self.response).not_to_be_null()
+        expect(self.response.status_code).to_equal(200)
+        expect(self.response.body).to_equal("whatever")
+
+    def test_can_handle_cached_responses_when_not_cached(self):
+        url = 'http://www.google.com'
+        otto = Octopus(concurrency=1, cache=True)
+
+        def handle_url_response(url, response):
+            self.response = response
+
+        otto.enqueue(url, handle_url_response)
+
+        otto.start()
+
+        otto.wait(2)
+
+        expect(self.response).not_to_be_null()
+        expect(self.response.status_code).to_equal(200)
