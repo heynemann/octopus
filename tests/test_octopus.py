@@ -63,6 +63,20 @@ class TestOctopus(TestCase):
         expect(self.response).not_to_be_null()
         expect(self.response.status_code).to_equal(200)
 
+    def test_can_wait(self):
+        otto = Octopus(concurrency=1)
+
+        def handle_url_response(url, response):
+            self.response = response
+
+        otto.enqueue('http://www.google.com', handle_url_response)
+        otto.start()
+
+        otto.wait(0)
+
+        expect(self.response).not_to_be_null()
+        expect(self.response.status_code).to_equal(200)
+
     def test_times_out_on_wait(self):
         otto = Octopus(concurrency=1)
 

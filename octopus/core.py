@@ -84,4 +84,7 @@ class Octopus(object):
             self.url_queue.task_done()
 
     def wait(self, timeout=10):
-        self.url_queue.join_with_timeout(timeout=timeout)
+        if timeout > 0:
+            self.url_queue.join_with_timeout(timeout=timeout)
+        else:
+            self.url_queue.join()
