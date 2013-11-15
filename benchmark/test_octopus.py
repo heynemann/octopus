@@ -65,7 +65,7 @@ def main(repetitions, concurrency):
 
     start_time = time()
     otto.start()
-    otto.wait()
+    otto.wait(0)
 
     otto_total_time = time() - start_time
 
@@ -82,7 +82,7 @@ def main(repetitions, concurrency):
         otto.enqueue(url, handle_url_response)
 
     start_time = time()
-    otto.wait()
+    otto.wait(0)
 
     otto_cached_total_time = time() - start_time
 
@@ -100,10 +100,10 @@ def main(repetitions, concurrency):
     )
     print
 
-    print "[octopus] Retrieving %d urls took %.2f seconds meaning %.2f urls/second" % (
+    print "[octopus] Retrieving %d urls (using cache) took %.2f seconds meaning %.2f urls/second" % (
         repetitions,
-        otto_total_time,
-        repetitions / otto_total_time
+        otto_cached_total_time,
+        repetitions / otto_cached_total_time
     )
     print
 
