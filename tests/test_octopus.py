@@ -128,6 +128,9 @@ class TestOctopus(TestCase):
             self.response = response
 
         otto.enqueue(url, handle_url_response)
+        otto.enqueue(url, handle_url_response)
+        otto.enqueue(url, handle_url_response)
+        otto.enqueue(url, handle_url_response)
 
         otto.start()
 

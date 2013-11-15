@@ -69,9 +69,16 @@ class Octopus(object):
         while True:
             url, handler = self.url_queue.get()
 
-            response = requests.get(url)
+            response = None
             if self.cache:
-                self.response_cache.put(url, response)
+                response = self.response_cache.get(url)
+
+            if response is None:
+                response = requests.get(url)
+
+                if self.cache:
+                    self.response_cache.put(url, response)
+
             handler(url, response)
 
             self.url_queue.task_done()
