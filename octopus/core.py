@@ -40,3 +40,6 @@ class Octopus(object):
             handler(response)
 
             self.url_queue.task_done()
+
+    def wait(self):
+        self.url_queue.join()

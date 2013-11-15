@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import time
-
 from preggy import expect
 
 from octopus import Octopus
@@ -41,10 +39,7 @@ class TestOctopus(TestCase):
         otto.enqueue('http://www.google.com', handle_url_response)
         otto.start()
 
-        tried = 0
-        while not self.response and tried < 30:
-            tried += 1
-            time.sleep(0.1)
+        otto.wait()
 
         expect(self.response).not_to_be_null()
         expect(self.response.status_code).to_equal(200)
