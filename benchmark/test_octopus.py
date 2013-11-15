@@ -69,6 +69,23 @@ def main(repetitions, concurrency):
 
     otto_total_time = time() - start_time
 
+    message = "Retrieving URLs concurrently with Octopus with caching enabled..."
+    print
+    print("=" * len(message))
+    print(message)
+    print("=" * len(message))
+    print
+
+    otto = Octopus(concurrency=concurrency, cache=True, auto_start=True)
+
+    for url in urls_to_retrieve:
+        otto.enqueue(url, handle_url_response)
+
+    start_time = time()
+    otto.wait()
+
+    otto_cached_total_time = time() - start_time
+
     message = "RESULTS"
     print
     print("=" * len(message))
@@ -84,6 +101,13 @@ def main(repetitions, concurrency):
     print
 
     print "[octopus] Retrieving %d urls took %.2f seconds meaning %.2f urls/second" % (
+        repetitions,
+        otto_total_time,
+        repetitions / otto_total_time
+    )
+    print
+
+    print "[octopus] Retrieving %d urls with local in-memory caching took %.2f seconds meaning %.2f urls/second" % (
         repetitions,
         otto_total_time,
         repetitions / otto_total_time

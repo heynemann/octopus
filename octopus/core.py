@@ -70,6 +70,8 @@ class Octopus(object):
             url, handler = self.url_queue.get()
 
             response = requests.get(url)
+            if self.cache:
+                self.response_cache.put(url, response)
             handler(url, response)
 
             self.url_queue.task_done()
