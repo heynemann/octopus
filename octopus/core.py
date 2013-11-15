@@ -1,11 +1,30 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from collections import defaultdict
+from time import time
 from threading import Thread
 
 import requests
 from six.moves import queue
+
+
+class TimeoutError(RuntimeError):
+    pass
+
+
+class OctopusQueue(queue.Queue):
+    # from http://stackoverflow.com/questions/1564501/add-timeout-argument-to-pythons-queue-join
+    def join_with_timeout(self, timeout):
+        self.all_tasks_done.acquire()
+        try:
+            endtime = time() + timeout
+            while self.unfinished_tasks:
+                remaining = endtime - time()
+                if remaining <= 0.0:
+                    raise TimeoutError
+                self.all_tasks_done.wait(remaining)
+        finally:
+            self.all_tasks_done.release()
 
 
 class Octopus(object):
@@ -13,7 +32,10 @@ class Octopus(object):
         self.concurrency = concurrency
         self.auto_start = auto_start
 
-        self.url_queue = queue.Queue()
+        self.url_queue = OctopusQueue()
+
+        if auto_start:
+            self.start()
 
     def enqueue(self, url, handler):
         self.url_queue.put_nowait((url, handler))
@@ -41,5 +63,5 @@ class Octopus(object):
 
             self.url_queue.task_done()
 
-    def wait(self):
-        self.url_queue.join()
+    def wait(self, timeout=10):
+        self.url_queue.join_with_timeout(timeout=timeout)

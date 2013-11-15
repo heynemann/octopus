@@ -1,13 +1,19 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import sys
+
 from preggy import expect
 
-from octopus import Octopus
+from octopus import Octopus, TimeoutError
 from tests import TestCase
 
 
 class TestOctopus(TestCase):
+    def setUp(self):
+        self.response = None
+        self.responses = {}
+
     def test_can_create_octopus(self):
         otto = Octopus(concurrency=20)
         expect(otto.concurrency).to_equal(20)
@@ -31,18 +37,45 @@ class TestOctopus(TestCase):
     def test_can_get_after_started(self):
         otto = Octopus(concurrency=1)
 
-        self.response = None
-
         def handle_url_response(url, response):
             self.response = response
 
         otto.enqueue('http://www.google.com', handle_url_response)
         otto.start()
 
-        otto.wait()
+        otto.wait(2)
 
         expect(self.response).not_to_be_null()
         expect(self.response.status_code).to_equal(200)
+
+    def test_can_get_with_auto_start(self):
+        otto = Octopus(concurrency=1, auto_start=True)
+
+        def handle_url_response(url, response):
+            self.response = response
+
+        otto.enqueue('http://www.google.com', handle_url_response)
+
+        otto.wait(2)
+
+        expect(self.response).not_to_be_null()
+        expect(self.response.status_code).to_equal(200)
+
+    def test_times_out_on_wait(self):
+        otto = Octopus(concurrency=1)
+
+        def handle_url_response(url, response):
+            self.response = response
+
+        otto.enqueue('http://www.google.com', handle_url_response)
+
+        try:
+            otto.wait(0.1)
+        except TimeoutError:
+            err = sys.exc_info()[1]
+            expect(err).to_have_an_error_message_of("")
+        else:
+            assert False, "Should not have gotten this far"
 
     def test_can_handle_more_urls_concurrently(self):
         urls = [
@@ -53,8 +86,6 @@ class TestOctopus(TestCase):
         ]
         otto = Octopus(concurrency=4)
 
-        self.responses = {}
-
         def handle_url_response(url, response):
             self.responses[url] = response
 
@@ -63,7 +94,7 @@ class TestOctopus(TestCase):
 
         otto.start()
 
-        otto.wait()
+        otto.wait(10)
 
         expect(self.responses).to_length(4)
 
