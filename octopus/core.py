@@ -4,8 +4,15 @@
 from time import time
 from threading import Thread
 
-import requests
-from six.moves import queue
+try:
+    import requests
+except ImportError:
+    print("Can't import requests. Probably setup.py installing package.")
+
+try:
+    from six.moves import queue
+except ImportError:
+    print("Can't import six. Probably setup.py installing package.")
 
 from octopus.cache import Cache
 
