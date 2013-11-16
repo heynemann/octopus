@@ -50,14 +50,14 @@ class Octopus(object):
         if auto_start:
             self.start()
 
-    def enqueue(self, url, handler):
+    def enqueue(self, url, handler, method='GET', **kw):
         if self.cache:
             response = self.response_cache.get(url)
             if response is not None:
                 handler(url, response)
                 return
 
-        self.url_queue.put_nowait((url, handler))
+        self.url_queue.put_nowait((url, handler, method, kw))
 
     @property
     def queue_size(self):
@@ -75,14 +75,14 @@ class Octopus(object):
 
     def do_work(self):
         while True:
-            url, handler = self.url_queue.get()
+            url, handler, method, kwargs = self.url_queue.get()
 
             response = None
             if self.cache:
                 response = self.response_cache.get(url)
 
             if response is None:
-                response = requests.get(url)
+                response = requests.request(method, url, **kwargs)
 
                 if self.cache:
                     self.response_cache.put(url, response)
