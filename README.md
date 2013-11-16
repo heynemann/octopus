@@ -104,14 +104,16 @@ The first argument is the number of URLs to retrieve. The seconds argument means
 
 The test is pretty simple. Time how long it takes for requests to get the URLs sequentially and for `octopus` to get them concurrently.
 
-The results for retrieving 1000 urls with 200 threads is as follows:
+The results for retrieving 2000 urls with 200 threads is as follows:
 
     =======
     RESULTS
     =======
 
-    [requests] Retrieving 200 urls took 263.26 seconds meaning 0.76 urls/second
+    [requests] Retrieving 2000 urls took 2692.66 seconds meaning 0.74 urls/second.
 
-    [octopus] Retrieving 200 urls took 12.87 seconds meaning 15.54 urls/second
+    [octopus] Retrieving 2000 urls took 33.56 seconds meaning 59.59 urls/second.
 
-    Overall, octopus was more than 20.00 times faster than sequential requests.
+    [octopus] Retrieving 2000 urls with local in-memory caching took 2.43 seconds meaning 821.95 urls/second.
+
+    Overall, octopus was more than 80.00 times faster than sequential requests.

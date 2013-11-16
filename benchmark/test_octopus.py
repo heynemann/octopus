@@ -93,24 +93,24 @@ def main(repetitions, concurrency):
     print("=" * len(message))
     print
 
-    print "[requests] Retrieving %d urls took %.2f seconds meaning %.2f urls/second" % (
+    print "[requests] Retrieving %d urls took %.2f seconds meaning %.2f urls/second." % (
         repetitions,
         requests_total_time,
         repetitions / requests_total_time
     )
     print
 
-    print "[octopus] Retrieving %d urls (using cache) took %.2f seconds meaning %.2f urls/second" % (
-        repetitions,
-        otto_cached_total_time,
-        repetitions / otto_cached_total_time
-    )
-    print
-
-    print "[octopus] Retrieving %d urls with local in-memory caching took %.2f seconds meaning %.2f urls/second" % (
+    print "[octopus] Retrieving %d urls took %.2f seconds meaning %.2f urls/second." % (
         repetitions,
         otto_total_time,
         repetitions / otto_total_time
+    )
+    print
+
+    print "[octopus] Retrieving %d urls with local in-memory caching took %.2f seconds meaning %.2f urls/second." % (
+        repetitions,
+        otto_cached_total_time,
+        repetitions / otto_cached_total_time
     )
     print
 
