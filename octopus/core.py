@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import sys
 from time import time
 from threading import Thread
 
@@ -35,6 +36,13 @@ except ImportError:
 
 class TimeoutError(RuntimeError):
     pass
+
+
+class ResponseError(object):
+    def __init__(self, status_code, body, error=None):
+        self.status_code = status_code
+        self.body = body
+        self.error = error
 
 
 class Octopus(object):
@@ -82,7 +90,17 @@ class Octopus(object):
                 response = self.response_cache.get(url)
 
             if response is None:
-                response = requests.request(method, url, **kwargs)
+                try:
+                    response = requests.request(method, url, **kwargs)
+                except requests.ConnectionError:
+                    err = sys.exc_info()[1]
+                    #print err.message.__class__.__module__
+                    #print err.message.__class__.__name__
+                    response = ResponseError(
+                        status_code=500,
+                        body=str(err.message),
+                        error=err
+                    )
 
                 if self.cache:
                     self.response_cache.put(url, response)

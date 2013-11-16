@@ -5,8 +5,9 @@ import sys
 
 from preggy import expect
 from mock import Mock
+import requests.exceptions
 
-from octopus import Octopus, TimeoutError
+from octopus import Octopus, TimeoutError, ResponseError
 from tests import TestCase
 
 
@@ -160,3 +161,23 @@ class TestOctopus(TestCase):
 
         expect(self.response).not_to_be_null()
         expect(self.response.status_code).to_equal(200)
+
+    def test_can_handle_invalid_urls(self):
+        url = 'http://kagdjdkjgka.fk'
+        otto = Octopus(concurrency=1)
+
+        def handle_url_response(url, response):
+            self.response = response
+
+        otto.enqueue(url, handle_url_response)
+
+        otto.start()
+
+        otto.wait(2)
+
+        expect(self.response).not_to_be_null()
+        expect(self.response).to_be_instance_of(ResponseError)
+        expect(self.response.status_code).to_equal(500)
+        expect(self.response.body).to_include("HTTPConnectionPool(host='kagdjdkjgka.fk', port=80)")
+        expect(self.response.body).to_include('Max retries exceeded with url: /')
+        expect(self.response.error).to_be_instance_of(requests.exceptions.ConnectionError)

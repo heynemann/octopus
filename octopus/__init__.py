@@ -3,4 +3,4 @@
 
 __version__ = '0.3.0'
 
-from octopus.core import Octopus, TimeoutError  # NOQA
+from octopus.core import Octopus, TimeoutError, ResponseError  # NOQA
