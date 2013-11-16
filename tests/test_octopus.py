@@ -46,7 +46,7 @@ class TestOctopus(TestCase):
         otto.enqueue('http://www.google.com', handle_url_response)
         otto.start()
 
-        otto.wait(2)
+        otto.wait(5)
 
         expect(self.response).not_to_be_null()
         expect(self.response.status_code).to_equal(200)
@@ -59,7 +59,7 @@ class TestOctopus(TestCase):
 
         otto.enqueue('http://www.google.com', handle_url_response)
 
-        otto.wait(2)
+        otto.wait(5)
 
         expect(self.response).not_to_be_null()
         expect(self.response.status_code).to_equal(200)
@@ -82,7 +82,7 @@ class TestOctopus(TestCase):
         otto = Octopus(concurrency=1)
         otto.start()
 
-        otto.wait()
+        otto.wait(5)
 
         expect(otto.is_empty).to_be_true()
 
@@ -157,7 +157,7 @@ class TestOctopus(TestCase):
 
         otto.start()
 
-        otto.wait(2)
+        otto.wait(5)
 
         expect(self.response).not_to_be_null()
         expect(self.response.status_code).to_equal(200)
@@ -173,7 +173,7 @@ class TestOctopus(TestCase):
 
         otto.start()
 
-        otto.wait(2)
+        otto.wait(5)
 
         expect(self.response).not_to_be_null()
         expect(self.response).to_be_instance_of(ResponseError)
