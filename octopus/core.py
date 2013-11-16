@@ -7,6 +7,7 @@ from threading import Thread
 
 try:
     import requests
+    import requests.exceptions
 except ImportError:
     print("Can't import requests. Probably setup.py installing package.")
 
@@ -94,6 +95,13 @@ class Octopus(object):
                 try:
                     response = requests.request(method, url, timeout=self.request_timeout_in_seconds, **kwargs)
                 except requests.ConnectionError:
+                    err = sys.exc_info()[1]
+                    response = ResponseError(
+                        status_code=500,
+                        body=str(err),
+                        error=err
+                    )
+                except requests.exceptions.Timeout:
                     err = sys.exc_info()[1]
                     response = ResponseError(
                         status_code=500,

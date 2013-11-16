@@ -181,3 +181,19 @@ class TestOctopus(TestCase):
         expect(self.response.body).to_include("HTTPConnectionPool(host='kagdjdkjgka.fk', port=80)")
         expect(self.response.body).to_include('Max retries exceeded with url: /')
         expect(self.response.error).to_be_instance_of(requests.exceptions.ConnectionError)
+
+    def test_can_handle_timeouts(self):
+        url = 'http://baidu.com'
+        otto = Octopus(concurrency=1, request_timeout_in_seconds=0.1)
+
+        def handle_url_response(url, response):
+            self.response = response
+
+        otto.enqueue(url, handle_url_response)
+
+        otto.start()
+
+        otto.wait(5)
+
+        expect(self.response.body).to_include('Connection to baidu.com timed out')
+        expect(self.response.error).to_be_instance_of(requests.exceptions.Timeout)
