@@ -80,6 +80,17 @@ Octopus.is_empty
 
 This property returns if the URL queue is empty.
 
+Octopus.wait(timeout=10)
+------------------------
+
+If you want to wait for all the URLs in the queue to finish loading, just call this method.
+
+If you specify a `timeout` of `0`, `octopus` will wait until the queue is empty, no matter how long it takes.
+
+If a timeout occurs, this method raises `Octopus.TimeoutError`.
+
+This is a **blocking** method.
+
 Benchmark
 =========
 
@@ -95,12 +106,12 @@ The test is pretty simple. Time how long it takes for requests to get the URLs s
 
 The results for retrieving 1000 urls with 200 threads is as follows:
 
-  =======
-  RESULTS
-  =======
+    =======
+    RESULTS
+    =======
 
-  [requests] Retrieving 200 urls took 263.26 seconds meaning 0.76 urls/second
+    [requests] Retrieving 200 urls took 263.26 seconds meaning 0.76 urls/second
 
-  [octopus] Retrieving 200 urls took 12.87 seconds meaning 15.54 urls/second
+    [octopus] Retrieving 200 urls took 12.87 seconds meaning 15.54 urls/second
 
-  Overall, octopus was more than 20.00 times faster than sequential requests.
+    Overall, octopus was more than 20.00 times faster than sequential requests.
