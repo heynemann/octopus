@@ -94,8 +94,6 @@ class Octopus(object):
                     response = requests.request(method, url, **kwargs)
                 except requests.ConnectionError:
                     err = sys.exc_info()[1]
-                    #print err.message.__class__.__module__
-                    #print err.message.__class__.__name__
                     response = ResponseError(
                         status_code=500,
                         body=str(err.message),
