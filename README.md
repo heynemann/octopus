@@ -61,12 +61,14 @@ Octopus.start()
 
 If `auto_start` is set to `False`, this method must be called to start retrieving URLs. This is a **non-blocking** method.
 
-Octopus.enqueue(url, handler)
+Octopus.enqueue(url, handler, method="GET", **kwargs)
 -----------------------------
 
 This is the main method in the `Octopus` class. This method is used to enqueue new URLs. The handler argument specifies the method to be called when the response is available.
 
 The handler takes the form `handler(url, response)`. The response argument is a [Response](http://www.python-requests.org/en/latest/api/#requests.Response) instance.
+
+You can specify a different method using the `method` argument (`POST`, `HEAD`, etc) and you can pass extra keyword arguments to the `requests.request` method using the keyword arguments for this method.
 
 This is a **non-blocking** method.
 
