@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print" />
+
+    <title>Octopus by heynemann</title>
+  </head>
+
+  <body>
+
+    <header>
+      <div class="container">
+        <h1>Octopus</h1>
+        <h2>octopus is a library to use threads to concurrently retrieve and report on the completion of http requests</h2>
+
+        <section id="downloads">
+          <a href="https://github.com/heynemann/octopus/zipball/master" class="btn">Download as .zip</a>
+          <a href="https://github.com/heynemann/octopus/tarball/master" class="btn">Download as .tar.gz</a>
+          <a href="https://github.com/heynemann/octopus" class="btn btn-github"><span class="icon"></span>View on GitHub</a>
+        </section>
+      </div>
+    </header>
+
+    <div class="container">
+      <section id="main_content">
+        <h1>
+<a name="octopus" class="anchor" href="#octopus"><span class="octicon octicon-link"></span></a>octopus</h1>
+
+<p><a href="https://travis-ci.org/heynemann/octopus"><img src="https://travis-ci.org/heynemann/octopus.png?branch=master" alt="Build Status"></a>
+<a href="https://crate.io/packages/octopus-http/"><img src="https://pypip.in/v/octopus-http/badge.png" alt="PyPi version"></a>
+<a href="https://crate.io/packages/octopus-http/"><img src="https://pypip.in/d/octopus-http/badge.png" alt="PyPi downloads"></a>
+<a href="https://coveralls.io/r/heynemann/octopus?branch=master"><img src="https://coveralls.io/repos/heynemann/octopus/badge.png?branch=master" alt="Coverage Status"></a></p>
+
+<p><code>octopus</code> is a library to use threads to concurrently retrieve and report on the completion of http requests</p>
+
+<h1>
+<a name="installing" class="anchor" href="#installing"><span class="octicon octicon-link"></span></a>Installing</h1>
+
+<p>Installing <code>octopus</code> is really easy:</p>
+
+<pre><code>$ pip install octopus-http
+</code></pre>
+
+<p>The reason for the name of the package is that a package called <code>octopus</code> was already registered at the Python Package Index.</p>
+
+<h1>
+<a name="using" class="anchor" href="#using"><span class="octicon octicon-link"></span></a>Using</h1>
+
+<p>Using <code>octopus</code> is pretty simple:</p>
+
+<pre><code># this Octopus instance we'll run 4 threads,
+# automatically start listening to the queue and
+# we'll in-memory cache responses for 10 seconds.
+otto = Octopus(concurrency=4, auto_start=True, cache=True, expiration_in_seconds=10)
+
+def handle_url_response(url, response):
+    # do something with response
+
+otto.enqueue('http://www.google.com', handle_url_response)
+otto.enqueue('http://www.facebook.com', handle_url_response)
+otto.enqueue('http://www.yahoo.com', handle_url_response)
+otto.enqueue('http://www.google.com', handle_url_response)  # will come from the cache
+
+otto.wait()  # waits until queue is empty or timeout is ellapsed
+</code></pre>
+
+<h1>
+<a name="api-reference" class="anchor" href="#api-reference"><span class="octicon octicon-link"></span></a>API Reference</h1>
+
+<h2>
+<a name="octopus-class" class="anchor" href="#octopus-class"><span class="octicon octicon-link"></span></a>Octopus Class</h2>
+
+<p>This is the main unit of work in <code>octopus</code>. To enqueue new urls you need to have an <code>Octopus</code> instance:</p>
+
+<pre><code>from octopus import Octopus
+
+otto = Octopus()
+</code></pre>
+
+<p>The constructor for <code>Octopus</code> takes several configuration options:</p>
+
+<ul>
+<li>
+<code>concurrency</code>: number of threads to use to retrieve URLs (defaults to 10 threads);</li>
+<li>
+<code>auto_start</code>: Indicates whether threads should be started automatically (defaults to False);</li>
+<li>
+<code>cache</code>: If set to <code>True</code>, responses will be cached for the number of seconds specified in <code>expiration_in_seconds</code> (defaults to False);</li>
+<li>
+<code>expiration_in_seconds</code>: The number of seconds to keep url responses in the local cache (defaults to 30).</li>
+</ul><h2>
+<a name="octopusstart" class="anchor" href="#octopusstart"><span class="octicon octicon-link"></span></a>Octopus.start()</h2>
+
+<p>If <code>auto_start</code> is set to <code>False</code>, this method must be called to start retrieving URLs. This is a <strong>non-blocking</strong> method.</p>
+
+<h2>
+<a name="octopusenqueueurl-handler" class="anchor" href="#octopusenqueueurl-handler"><span class="octicon octicon-link"></span></a>Octopus.enqueue(url, handler)</h2>
+
+<p>This is the main method in the <code>Octopus</code> class. This method is used to enqueue new URLs. The handler argument specifies the method to be called when the response is available.</p>
+
+<p>The handler takes the form <code>handler(url, response)</code>. The response argument is a <a href="http://www.python-requests.org/en/latest/api/#requests.Response">Response</a> instance.</p>
+
+<p>This is a <strong>non-blocking</strong> method.</p>
+
+<h2>
+<a name="octopusqueue_size" class="anchor" href="#octopusqueue_size"><span class="octicon octicon-link"></span></a>Octopus.queue_size</h2>
+
+<p>This property returns the approximate number of URLs still in the queue (not retrieved yet).</p>
+
+<h2>
+<a name="octopusis_empty" class="anchor" href="#octopusis_empty"><span class="octicon octicon-link"></span></a>Octopus.is_empty</h2>
+
+<p>This property returns if the URL queue is empty.</p>
+
+<h2>
+<a name="octopuswaittimeout10" class="anchor" href="#octopuswaittimeout10"><span class="octicon octicon-link"></span></a>Octopus.wait(timeout=10)</h2>
+
+<p>If you want to wait for all the URLs in the queue to finish loading, just call this method.</p>
+
+<p>If you specify a <code>timeout</code> of <code>0</code>, <code>octopus</code> will wait until the queue is empty, no matter how long it takes.</p>
+
+<p>If a timeout occurs, this method raises <code>Octopus.TimeoutError</code>.</p>
+
+<p>This is a <strong>blocking</strong> method.</p>
+
+<h1>
+<a name="benchmark" class="anchor" href="#benchmark"><span class="octicon octicon-link"></span></a>Benchmark</h1>
+
+<p>In order to decide whether <code>octopus</code> really was worth using, it features a benchmark test in it's codebase.</p>
+
+<p>If you want to run it yourself (which is highly encouraged), just clone <code>octopus</code> repository and run this command:</p>
+
+<pre><code>$ python benchmark/test_octopus.py 200 100
+</code></pre>
+
+<p>The first argument is the number of URLs to retrieve. The seconds argument means how many threads will be used by <code>octopus</code> to get the urls.</p>
+
+<p>The test is pretty simple. Time how long it takes for requests to get the URLs sequentially and for <code>octopus</code> to get them concurrently.</p>
+
+<p>The results for retrieving <code>2000</code> urls with <code>200</code> threads is as follows:</p>
+
+<pre><code>=======
+RESULTS
+=======
+
+[requests] Retrieving 2000 urls took 2692.66 seconds meaning 0.74 urls/second.
+
+[octopus] Retrieving 2000 urls took 33.56 seconds meaning 59.59 urls/second.
+
+[octopus] Retrieving 2000 urls with local in-memory caching took 2.43 seconds 
+meaning 821.95 urls/second.
+
+Overall, octopus was more than 80.00 times faster than sequential requests.
+</code></pre>
+      </section>
+    </div>
+
+              <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+          </script>
+          <script type="text/javascript">
+            try {
+              var pageTracker = _gat._getTracker("UA-45782943-1");
+            pageTracker._trackPageview();
+            } catch(err) {}
+          </script>
+
+  </body>
+</html>
