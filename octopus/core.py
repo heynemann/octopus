@@ -96,7 +96,7 @@ class Octopus(object):
                     err = sys.exc_info()[1]
                     response = ResponseError(
                         status_code=500,
-                        body=str(err.message),
+                        body=str(err),
                         error=err
                     )
 
