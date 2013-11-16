@@ -104,7 +104,7 @@ The first argument is the number of URLs to retrieve. The seconds argument means
 
 The test is pretty simple. Time how long it takes for requests to get the URLs sequentially and for `octopus` to get them concurrently.
 
-The results for retrieving 2000 urls with 200 threads is as follows:
+The results for retrieving `2000` urls with `200` threads is as follows:
 
     =======
     RESULTS
