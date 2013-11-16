@@ -34,8 +34,6 @@
         </div>
       </div><!-- end banner -->
 
-    <div class="dococ"><span></span><div></div></div>
-
     <div class="wrapper">
       <nav>
         <ul></ul>
@@ -112,11 +110,13 @@ otto = Octopus()
 <p>If <code>auto_start</code> is set to <code>False</code>, this method must be called to start retrieving URLs. This is a <strong>non-blocking</strong> method.</p>
 
 <h2>
-<a name="octopusenqueueurl-handler" class="anchor" href="#octopusenqueueurl-handler"><span class="octicon octicon-link"></span></a>Octopus.enqueue(url, handler)</h2>
+<a name="octopusenqueueurl-handler-methodget-kwargs" class="anchor" href="#octopusenqueueurl-handler-methodget-kwargs"><span class="octicon octicon-link"></span></a>Octopus.enqueue(url, handler, method="GET", **kwargs)</h2>
 
 <p>This is the main method in the <code>Octopus</code> class. This method is used to enqueue new URLs. The handler argument specifies the method to be called when the response is available.</p>
 
 <p>The handler takes the form <code>handler(url, response)</code>. The response argument is a <a href="http://www.python-requests.org/en/latest/api/#requests.Response">Response</a> instance.</p>
+
+<p>You can specify a different method using the <code>method</code> argument (<code>POST</code>, <code>HEAD</code>, etc) and you can pass extra keyword arguments to the <code>requests.request</code> method using the keyword arguments for this method.</p>
 
 <p>This is a <strong>non-blocking</strong> method.</p>
 
