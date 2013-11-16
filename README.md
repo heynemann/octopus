@@ -51,10 +51,10 @@ This is the main unit of work in `octopus`. To enqueue new urls you need to have
 
 The constructor for `Octopus` takes several configuration options:
 
-* concurrency: number of threads to use to retrieve URLs (defaults to 10 threads);
-* auto_start: Indicates whether threads should be started automatically (defaults to False);
-* cache: If set to `True`, responses will be cached for the number of seconds specified in `expiration_in_seconds` (defaults to False);
-* expiration_in_seconds: The number of seconds to keep url responses in the local cache (defaults to 30).
+* `concurrency`: number of threads to use to retrieve URLs (defaults to 10 threads);
+* `auto_start`: Indicates whether threads should be started automatically (defaults to False);
+* `cache`: If set to `True`, responses will be cached for the number of seconds specified in `expiration_in_seconds` (defaults to False);
+* `expiration_in_seconds`: The number of seconds to keep url responses in the local cache (defaults to 30).
 
 Octopus.start()
 ---------------
