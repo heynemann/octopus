@@ -114,6 +114,7 @@ The results for retrieving `2000` urls with `200` threads is as follows:
 
     [octopus] Retrieving 2000 urls took 33.56 seconds meaning 59.59 urls/second.
 
-    [octopus] Retrieving 2000 urls with local in-memory caching took 2.43 seconds meaning 821.95 urls/second.
+    [octopus] Retrieving 2000 urls with local in-memory caching took 2.43 seconds 
+    meaning 821.95 urls/second.
 
     Overall, octopus was more than 80.00 times faster than sequential requests.
