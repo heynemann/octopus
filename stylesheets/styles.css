@@ -123,6 +123,7 @@ textarea {
  */
 body {
   margin: 0;
+  position: relative;
 }
 
 /* =============================================================================
@@ -1007,4 +1008,13 @@ footer {
     bottom: auto;
     width: auto;
   }
+}
+
+.dococ {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: url('../images/dococ.png') 0 0 no-repeat;
+  width: 442px;
+  height: 348px;
 }
