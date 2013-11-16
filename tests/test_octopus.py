@@ -77,6 +77,14 @@ class TestOctopus(TestCase):
         expect(self.response).not_to_be_null()
         expect(self.response.status_code).to_equal(200)
 
+    def test_wait_returns_automatically_when_empty(self):
+        otto = Octopus(concurrency=1)
+        otto.start()
+
+        otto.wait()
+
+        expect(otto.is_empty).to_be_true()
+
     def test_times_out_on_wait(self):
         otto = Octopus(concurrency=1)
 
