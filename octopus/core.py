@@ -46,12 +46,13 @@ class ResponseError(object):
 
 
 class Octopus(object):
-    def __init__(self, concurrency=10, auto_start=False, cache=False, expiration_in_seconds=30):
+    def __init__(self, concurrency=10, auto_start=False, cache=False, expiration_in_seconds=30, request_timeout_in_seconds=5):
         self.concurrency = concurrency
         self.auto_start = auto_start
 
         self.cache = cache
         self.response_cache = Cache(expiration_in_seconds=expiration_in_seconds)
+        self.request_timeout_in_seconds = request_timeout_in_seconds
 
         self.url_queue = OctopusQueue()
 
@@ -91,7 +92,7 @@ class Octopus(object):
 
             if response is None:
                 try:
-                    response = requests.request(method, url, **kwargs)
+                    response = requests.request(method, url, timeout=self.request_timeout_in_seconds, **kwargs)
                 except requests.ConnectionError:
                     err = sys.exc_info()[1]
                     response = ResponseError(
