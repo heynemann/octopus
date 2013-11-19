@@ -4,3 +4,4 @@
 __version__ = '0.3.3'
 
 from octopus.core import Octopus, TimeoutError, ResponseError  # NOQA
+from octopus.tornado_core import TornadoOctopus  # NOQA

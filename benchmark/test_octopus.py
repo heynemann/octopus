@@ -7,7 +7,7 @@ from time import time
 
 import requests
 
-from octopus import Octopus
+from octopus import Octopus, TornadoOctopus
 
 
 def main(repetitions, concurrency):
@@ -33,6 +33,54 @@ def main(repetitions, concurrency):
 
     urls_to_retrieve = [choice(urls) for i in range(repetitions)]
 
+    #requests_total_time = sequential_requests(repetitions, urls_to_retrieve)
+    otto_total_time = otto_requests(repetitions, concurrency, urls_to_retrieve)
+    otto_cached_total_time = otto_cached_requests(repetitions, concurrency, urls_to_retrieve)
+    tornado_total_time = tornado_requests(repetitions, concurrency, urls_to_retrieve)
+
+    message = "RESULTS"
+    print
+    print("=" * len(message))
+    print(message)
+    print("=" * len(message))
+    print
+
+    #print "[requests] Retrieving %d urls took %.2f seconds meaning %.2f urls/second." % (
+        #repetitions,
+        #requests_total_time,
+        #repetitions / requests_total_time
+    #)
+    #print
+
+    print "[octopus] Retrieving %d urls took %.2f seconds meaning %.2f urls/second." % (
+        repetitions,
+        otto_total_time,
+        repetitions / otto_total_time
+    )
+    print
+
+    print "[octopus] Retrieving %d urls with local in-memory caching took %.2f seconds meaning %.2f urls/second." % (
+        repetitions,
+        otto_cached_total_time,
+        repetitions / otto_cached_total_time
+    )
+    print
+
+    print "[octopus-tornado] Retrieving %d urls took %.2f seconds meaning %.2f urls/second." % (
+        repetitions,
+        tornado_total_time,
+        repetitions / tornado_total_time
+    )
+    print
+
+    #print "Overall, octopus was more than %.2f times faster than sequential requests." % (
+        #int(requests_total_time / otto_total_time)
+    #)
+
+    #print
+
+
+def sequential_requests(repetitions, urls_to_retrieve):
     message = "Retrieving URLs sequentially with Requests..."
     print
     print("=" * len(message))
@@ -49,8 +97,10 @@ def main(repetitions, concurrency):
         )
         assert requests.get(url).status_code == 200
 
-    requests_total_time = time() - start_time
+    return time() - start_time
 
+
+def otto_requests(repetitions, concurrency, urls_to_retrieve):
     message = "Retrieving URLs concurrently with Octopus..."
     print
     print("=" * len(message))
@@ -67,8 +117,10 @@ def main(repetitions, concurrency):
     otto.start()
     otto.wait(0)
 
-    otto_total_time = time() - start_time
+    return time() - start_time
 
+
+def otto_cached_requests(repetitions, concurrency, urls_to_retrieve):
     message = "Retrieving URLs concurrently with Octopus with caching enabled..."
     print
     print("=" * len(message))
@@ -84,41 +136,31 @@ def main(repetitions, concurrency):
     start_time = time()
     otto.wait(0)
 
-    otto_cached_total_time = time() - start_time
+    return time() - start_time
 
-    message = "RESULTS"
+
+def tornado_requests(repetitions, concurrency, urls_to_retrieve):
+    message = "Retrieving URLs concurrently with TornadoOctopus..."
     print
     print("=" * len(message))
     print(message)
     print("=" * len(message))
     print
 
-    print "[requests] Retrieving %d urls took %.2f seconds meaning %.2f urls/second." % (
-        repetitions,
-        requests_total_time,
-        repetitions / requests_total_time
-    )
-    print
+    otto = TornadoOctopus(concurrency=concurrency, cache=True, auto_start=True)
 
-    print "[octopus] Retrieving %d urls took %.2f seconds meaning %.2f urls/second." % (
-        repetitions,
-        otto_total_time,
-        repetitions / otto_total_time
-    )
-    print
+    for url in urls_to_retrieve:
+        otto.enqueue(url, handle_tornado_url_response)
 
-    print "[octopus] Retrieving %d urls with local in-memory caching took %.2f seconds meaning %.2f urls/second." % (
-        repetitions,
-        otto_cached_total_time,
-        repetitions / otto_cached_total_time
-    )
-    print
+    start_time = time()
+    otto.wait(0)
 
-    print "Overall, octopus was more than %.2f times faster than sequential requests." % (
-        int(requests_total_time / otto_total_time)
-    )
+    return time() - start_time
 
-    print
+
+def handle_tornado_url_response(url, response):
+    print "Got %s!" % url
+    assert response.code == 200, "Expected status code for %s to be 200, got %s" % (url, response.code)
 
 
 def handle_url_response(url, response):
