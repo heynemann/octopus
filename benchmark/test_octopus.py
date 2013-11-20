@@ -34,6 +34,7 @@ def main(repetitions, concurrency):
     urls_to_retrieve = [choice(urls) for i in range(repetitions)]
 
     #requests_total_time = sequential_requests(repetitions, urls_to_retrieve)
+    requests_total_time = 2692.66  # did it once... takes too long to get 2000 urls sequentially.
     otto_total_time = otto_requests(repetitions, concurrency, urls_to_retrieve)
     otto_cached_total_time = otto_cached_requests(repetitions, concurrency, urls_to_retrieve)
     tornado_pycurl_total_time = tornado_requests(repetitions, concurrency, urls_to_retrieve)
@@ -46,12 +47,12 @@ def main(repetitions, concurrency):
     print("=" * len(message))
     print
 
-    #print "[requests] Retrieving %d urls took %.2f seconds meaning %.2f urls/second." % (
-        #repetitions,
-        #requests_total_time,
-        #repetitions / requests_total_time
-    #)
-    #print
+    print "[requests] Retrieving %d urls took %.2f seconds meaning %.2f urls/second." % (
+        repetitions,
+        requests_total_time,
+        repetitions / requests_total_time
+    )
+    print
 
     print "[octopus] Retrieving %d urls took %.2f seconds meaning %.2f urls/second." % (
         repetitions,
@@ -81,11 +82,12 @@ def main(repetitions, concurrency):
     )
     print
 
-    #print "Overall, octopus was more than %.2f times faster than sequential requests." % (
-        #int(requests_total_time / otto_total_time)
-    #)
+    print "Overall, threaded octopus was more than %d times faster than sequential requests and tornado octopus was more than %d times faster than sequential requests." % (
+        int(requests_total_time / otto_total_time),
+        int(tornado_pycurl_total_time / otto_total_time)
+    )
 
-    #print
+    print
 
 
 def sequential_requests(repetitions, urls_to_retrieve):

@@ -303,7 +303,7 @@ class TestTornadoOctopus(TestCase):
         expect(self.response).not_to_be_null()
         expect(self.response.status_code).to_equal(599)
         expect(self.response.text).to_be_null()
-        expect(self.response.error).to_equal('HTTP 599: Could not resolve host: kagdjdkjgka.fk')
+        expect(self.response.error).not_to_be_null()
 
     def test_can_handle_timeouts(self):
         url = 'http://baidu.com'
@@ -316,5 +316,6 @@ class TestTornadoOctopus(TestCase):
 
         otto.wait(5)
 
+        expect(self.response.status_code).to_equal(599)
         expect(self.response.text).to_be_null()
-        expect(self.response.error).to_include('HTTP 599: Connection timed out after')
+        expect(self.response.error).not_to_be_null()
