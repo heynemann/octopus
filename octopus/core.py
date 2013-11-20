@@ -3,6 +3,7 @@
 
 import sys
 from time import time
+from datetime import timedelta
 from threading import Thread
 
 try:
@@ -41,10 +42,18 @@ class TimeoutError(RuntimeError):
 
 
 class ResponseError(object):
-    def __init__(self, status_code, body, error=None):
+    def __init__(self, url, status_code, text, error=None, elapsed=None):
+        self.url = url
         self.status_code = status_code
-        self.body = body
+        self.text = text
         self.error = error
+        self.headers = {}
+        self.cookies = {}
+        self.effective_url = url
+        self.elapsed = elapsed
+
+    def close(self):
+        pass
 
 
 class Octopus(object):
@@ -68,7 +77,7 @@ class Octopus(object):
             cookies=dict([(key, value) for key, value in response.cookies.items()]),
             text=response.text, effective_url=response.url,
             error=response.status_code > 399 and response.text or None,
-            request_time=response.elapsed.total_seconds
+            request_time=response.elapsed and response.elapsed.total_seconds or 0
         )
 
     def enqueue(self, url, handler, method='GET', **kw):
@@ -108,15 +117,26 @@ class Octopus(object):
                 except requests.ConnectionError:
                     err = sys.exc_info()[1]
                     response = ResponseError(
+                        url=url,
                         status_code=500,
-                        body=str(err),
+                        text=str(err),
                         error=err
                     )
                 except requests.exceptions.Timeout:
                     err = sys.exc_info()[1]
                     response = ResponseError(
+                        url=url,
                         status_code=500,
-                        body=str(err),
+                        text=str(err),
+                        error=err,
+                        elapsed=timedelta(seconds=self.request_timeout_in_seconds)
+                    )
+                except Exception:
+                    err = sys.exc_info()[1]
+                    response = ResponseError(
+                        url=url,
+                        status_code=599,
+                        text=str(err),
                         error=err
                     )
 

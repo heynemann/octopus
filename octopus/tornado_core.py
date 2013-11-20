@@ -19,8 +19,8 @@ from octopus.model import Response
 class TornadoOctopus(object):
     def __init__(
             self, concurrency=10, auto_start=False, cache=False,
-            expiration_in_seconds=30, request_timeout_in_seconds=10,
-            connect_timeout_in_seconds=5, ignore_pycurl=False):
+            expiration_in_seconds=30, request_timeout_in_seconds=60,
+            connect_timeout_in_seconds=30, ignore_pycurl=False):
 
         self.concurrency = concurrency
         self.auto_start = auto_start
@@ -44,16 +44,21 @@ class TornadoOctopus(object):
                 #'the latest versions of libcurl an pycurl.'
             #)
 
+        self._stopped = True
+
         if auto_start:
             self.start()
 
     def start(self):
         self.ioloop = IOLoop()
         self.http_client = AsyncHTTPClient(io_loop=self.ioloop)
+        #self.start_alternate_thread()
 
-        t = Thread(target=self.start_ioloop, args=(self.ioloop, ))
-        t.daemon = True
-        t.start()
+    #def start_alternate_thread(self):
+        #print "starting ioloop"
+        #self.alternate_thread = Thread(target=self.start_ioloop, args=(self.ioloop, ))
+        #self.alternate_thread.daemon = True
+        #self.alternate_thread.start()
 
     def start_ioloop(self, ioloop):
         ioloop.start()
@@ -86,8 +91,8 @@ class TornadoOctopus(object):
                 request_url, handler, method, kw = self.url_queue.pop()
                 self.fetch(request_url, handler, method, **kw)
 
-            #if not self.url_queue:
-                #self.ioloop.stop()
+            if self.running_urls < 1:
+                self.stop()
 
         return handle
 
@@ -117,14 +122,21 @@ class TornadoOctopus(object):
 
         self.http_client.fetch(request, self.handle_request(url, handler))
 
-    def wait(self, timeout=10):
-        started = time.time()
+        #if self._stopped:
+            #self.start_alternate_thread()
 
-        if timeout > 0:
-            while (len(self.url_queue) > 0 or self.running_urls > 0) and (time.time() - started) < timeout:
-                time.sleep(0.1)
-        else:
-            while len(self.url_queue) > 0 or self.running_urls > 0:
-                time.sleep(0.1)
-
+    def handle_wait_timeout(self, signal_number, frames):
+        print "HELLO FROM SIGNAL %s" % signal_number
         self.ioloop.stop()
+
+    def wait(self, timeout=10):
+        if not self.url_queue and not self.running_urls:
+            return
+
+        self.ioloop.set_blocking_signal_threshold(timeout, self.handle_wait_timeout)
+        self.ioloop.start()
+
+    def stop(self):
+        print "stopping ioloop"
+        self.ioloop.stop()
+        self._stopped = True

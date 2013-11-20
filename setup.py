@@ -42,7 +42,8 @@ Octopus is a library to use threads to concurrently retrieve and report on the c
     include_package_data=True,
     install_requires=[
         'six',
-        'requests'
+        'requests',
+        'tornado'
     ],
     extras_require={
         'tests': tests_require,
