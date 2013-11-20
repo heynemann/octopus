@@ -36,7 +36,8 @@ def main(repetitions, concurrency):
     #requests_total_time = sequential_requests(repetitions, urls_to_retrieve)
     otto_total_time = otto_requests(repetitions, concurrency, urls_to_retrieve)
     otto_cached_total_time = otto_cached_requests(repetitions, concurrency, urls_to_retrieve)
-    tornado_total_time = tornado_requests(repetitions, concurrency, urls_to_retrieve)
+    tornado_pycurl_total_time = tornado_requests(repetitions, concurrency, urls_to_retrieve)
+    tornado_total_time = tornado_requests(repetitions, concurrency, urls_to_retrieve, ignore_pycurl=True)
 
     message = "RESULTS"
     print
@@ -70,6 +71,13 @@ def main(repetitions, concurrency):
         repetitions,
         tornado_total_time,
         repetitions / tornado_total_time
+    )
+    print
+
+    print "[octopus-tornado-pycurl] Retrieving %d urls took %.2f seconds meaning %.2f urls/second." % (
+        repetitions,
+        tornado_pycurl_total_time,
+        repetitions / tornado_pycurl_total_time
     )
     print
 
@@ -139,28 +147,25 @@ def otto_cached_requests(repetitions, concurrency, urls_to_retrieve):
     return time() - start_time
 
 
-def tornado_requests(repetitions, concurrency, urls_to_retrieve):
-    message = "Retrieving URLs concurrently with TornadoOctopus..."
+def tornado_requests(repetitions, concurrency, urls_to_retrieve, ignore_pycurl=False):
+    message = "Retrieving URLs concurrently with TornadoOctopus (%s)..." % (
+        ignore_pycurl and "using SimpleHTTPClient" or "using pycurl"
+    )
     print
     print("=" * len(message))
     print(message)
     print("=" * len(message))
     print
 
-    otto = TornadoOctopus(concurrency=concurrency, cache=True, auto_start=True)
+    otto = TornadoOctopus(concurrency=concurrency, cache=True, auto_start=True, ignore_pycurl=ignore_pycurl)
 
     for url in urls_to_retrieve:
-        otto.enqueue(url, handle_tornado_url_response)
+        otto.enqueue(url, handle_url_response)
 
     start_time = time()
     otto.wait(0)
 
     return time() - start_time
-
-
-def handle_tornado_url_response(url, response):
-    print "Got %s!" % url
-    assert response.code == 200, "Expected status code for %s to be 200, got %s" % (url, response.code)
 
 
 def handle_url_response(url, response):

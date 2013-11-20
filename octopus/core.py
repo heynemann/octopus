@@ -12,6 +12,7 @@ except ImportError:
     print("Can't import requests. Probably setup.py installing package.")
 
 from octopus.cache import Cache
+from octopus.model import Response
 
 try:
 
@@ -59,6 +60,16 @@ class Octopus(object):
 
         if auto_start:
             self.start()
+
+    def from_requests_response(self, url, response):
+        return Response(
+            url=url, status_code=response.status_code,
+            headers=dict([(key, value) for key, value in response.headers.items()]),
+            cookies=dict([(key, value) for key, value in response.cookies.items()]),
+            text=response.text, effective_url=response.url,
+            error=response.status_code > 399 and response.text or None,
+            request_time=response.elapsed.total_seconds
+        )
 
     def enqueue(self, url, handler, method='GET', **kw):
         if self.cache:
@@ -108,6 +119,8 @@ class Octopus(object):
                         body=str(err),
                         error=err
                     )
+
+                response = self.from_requests_response(url, response)
 
                 if self.cache:
                     self.response_cache.put(url, response)
