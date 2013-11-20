@@ -207,9 +207,12 @@ The results for retrieving `2000` urls with `200` threads is as follows:
 
     [requests] Retrieving 2000 urls took 2692.66 seconds meaning 0.74 urls/second.
 
-    [octopus] Retrieving 2000 urls took 33.56 seconds meaning 59.59 urls/second.
+    [octopus] Retrieving 2000 urls took 38.40 seconds meaning 52.09 urls/second.
 
-    [octopus] Retrieving 2000 urls with local in-memory caching took 2.43 seconds 
-    meaning 821.95 urls/second.
+    [octopus] Retrieving 2000 urls with local in-memory caching took 5.10 seconds meaning 392.10 urls/second.
 
-    Overall, octopus was more than 80.00 times faster than sequential requests.
+    [octopus-tornado] Retrieving 2000 urls took 169.72 seconds meaning 11.78 urls/second.
+
+    [octopus-tornado-pycurl] Retrieving 2000 urls took 165.90 seconds meaning 12.06 urls/second.
+
+    Overall, threaded octopus was more than 70 times faster than sequential requests and tornado octopus was more than 16 times faster than sequential requests.

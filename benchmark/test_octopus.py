@@ -14,7 +14,6 @@ def main(repetitions, concurrency):
 
     # alexa top sites
     urls = [
-        'http://google.com',
         'http://facebook.com',
         'http://youtube.com',
         'http://yahoo.com',
@@ -27,7 +26,6 @@ def main(repetitions, concurrency):
         'http://wordpress.com',
         'http://bing.com',
         'http://ebay.com',
-        'http://google.de',
         'http://tumblr.com',
     ]
 
@@ -84,7 +82,7 @@ def main(repetitions, concurrency):
 
     print "Overall, threaded octopus was more than %d times faster than sequential requests and tornado octopus was more than %d times faster than sequential requests." % (
         int(requests_total_time / otto_total_time),
-        int(tornado_pycurl_total_time / otto_total_time)
+        int(requests_total_time / tornado_pycurl_total_time)
     )
 
     print
