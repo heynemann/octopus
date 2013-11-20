@@ -143,6 +143,8 @@ class TestTornadoOctopus(TestCase):
 
     def test_can_fetch(self):
         otto = TornadoOctopus(cache=False, auto_start=True)
+        otto.response_cache.put('http://www.google.com', Mock())
+
         http_client_mock = Mock()
         otto.http_client = http_client_mock
 
@@ -150,6 +152,22 @@ class TestTornadoOctopus(TestCase):
 
         expect(otto.running_urls).to_equal(1)
         expect(http_client_mock.fetch.called).to_be_true()
+
+    def test_fetch_gets_the_response_from_cache_if_available(self):
+        otto = TornadoOctopus(cache=True, auto_start=True)
+        response_mock = Mock()
+        otto.response_cache.put('http://www.google.com', response_mock)
+
+        http_client_mock = Mock()
+        otto.http_client = http_client_mock
+
+        callback = Mock()
+
+        otto.fetch('http://www.google.com', callback, 'GET')
+
+        expect(otto.running_urls).to_equal(1)
+        expect(http_client_mock.fetch.called).to_be_false()
+        callback.assert_called_once_with('http://www.google.com', response_mock)
 
     @patch.object(TornadoOctopus, 'stop')
     def test_handle_request(self, stop_mock):
@@ -268,7 +286,7 @@ class TestTornadoOctopus(TestCase):
 
     def test_can_get_many_urls(self):
         urls = [
-            'http://www.google.com',
+            'http://www.twitter.com',
             'http://www.cnn.com',
             'http://www.bbc.com',
             'http://www.facebook.com'

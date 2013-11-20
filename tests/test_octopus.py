@@ -42,7 +42,7 @@ class TestOctopus(TestCase):
         def handle_url_response(url, response):
             self.response = response
 
-        otto.enqueue('http://www.google.com', handle_url_response)
+        otto.enqueue('http://www.twitter.com', handle_url_response)
         otto.start()
 
         otto.wait(5)
@@ -56,7 +56,7 @@ class TestOctopus(TestCase):
         def handle_url_response(url, response):
             self.response = response
 
-        otto.enqueue('http://www.google.com', handle_url_response)
+        otto.enqueue('http://www.twitter.com', handle_url_response)
 
         otto.wait(5)
 
@@ -69,7 +69,7 @@ class TestOctopus(TestCase):
         def handle_url_response(url, response):
             self.response = response
 
-        otto.enqueue('http://www.google.com', handle_url_response)
+        otto.enqueue('http://www.twitter.com', handle_url_response)
         otto.start()
 
         otto.wait(0)
@@ -103,7 +103,7 @@ class TestOctopus(TestCase):
 
     def test_can_handle_more_urls_concurrently(self):
         urls = [
-            'http://www.google.com',
+            'http://www.twitter.com',
             'http://www.cnn.com',
             'http://www.bbc.com',
             'http://www.facebook.com'
@@ -143,7 +143,7 @@ class TestOctopus(TestCase):
         expect(self.response.body).to_equal("whatever")
 
     def test_can_handle_cached_responses_when_not_cached(self):
-        url = 'http://www.google.com'
+        url = 'http://www.twitter.com'
         otto = Octopus(concurrency=1, cache=True)
 
         def handle_url_response(url, response):

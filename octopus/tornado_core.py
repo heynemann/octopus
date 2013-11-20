@@ -94,6 +94,15 @@ class TornadoOctopus(object):
 
     def fetch(self, url, handler, method, **kw):
         self.running_urls += 1
+
+        if self.cache:
+            response = self.response_cache.get(url)
+
+            if response is not None:
+                logging.debug('Cache hit on %s.' % url)
+                handler(url, response)
+                return
+
         logging.info('Fetching %s...' % url)
 
         request = HTTPRequest(
