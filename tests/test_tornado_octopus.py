@@ -78,6 +78,12 @@ class TestTornadoOctopus(TestCase):
         expect(otto.running_urls).to_equal(0)
         expect(otto.url_queue).to_be_empty()
 
+    def test_can_get_queue_info(self):
+        otto = TornadoOctopus()
+
+        expect(otto.queue_size).to_equal(0)
+        expect(otto.is_empty).to_be_true()
+
     def test_can_get_response_from_tornado_response(self):
         response = self.get_response()
 

@@ -46,6 +46,14 @@ class TornadoOctopus(object):
             logging.debug('Auto starting...')
             self.start()
 
+    @property
+    def queue_size(self):
+        return len(self.url_queue)
+
+    @property
+    def is_empty(self):
+        return self.queue_size == 0
+
     def start(self):
         logging.debug('Creating IOLoop and http_client.')
         self.ioloop = IOLoop()

@@ -82,7 +82,7 @@ It has the following information:
 Octopus Class
 -------------
 
-This is the main unit of work in `octopus`. To enqueue new urls you need to have an `Octopus` instance:
+This is the main unit of work in `octopus` if you want to use threads. To enqueue new urls you need to have an `Octopus` instance:
 
     from octopus import Octopus
 
@@ -102,11 +102,11 @@ Octopus.start()
 If `auto_start` is set to `False`, this method must be called to start retrieving URLs. This is a **non-blocking** method.
 
 Octopus.enqueue(url, handler, method="GET", **kwargs)
------------------------------
+-----------------------------------------------------
 
 This is the main method in the `Octopus` class. This method is used to enqueue new URLs. The handler argument specifies the method to be called when the response is available.
 
-The handler takes the form `handler(url, response)`. The response argument is a [Response](http://www.python-requests.org/en/latest/api/#requests.Response) instance.
+The handler takes the form `handler(url, response)`. The response argument is a Octopus.Response instance.
 
 You can specify a different method using the `method` argument (`POST`, `HEAD`, etc) and you can pass extra keyword arguments to the `requests.request` method using the keyword arguments for this method.
 
@@ -129,7 +129,60 @@ If you want to wait for all the URLs in the queue to finish loading, just call t
 
 If you specify a `timeout` of `0`, `octopus` will wait until the queue is empty, no matter how long it takes.
 
-If a timeout occurs, this method raises `Octopus.TimeoutError`.
+This is a **blocking** method.
+
+TornadoOctopus Class
+--------------------
+
+This is the main unit of work in `octopus` if you want to use Tornado's IOLoop. To enqueue new urls you need to have an `TornadoOctopus` instance:
+
+    from octopus import TornadoOctopus
+
+    otto = TornadoOctopus()
+
+A **very important** thing that differs from the threaded version of Octopus is that you **MUST** call wait to get the responses, since Tornado IOLoop needs to be run in order to get the requests.
+
+The constructor for `TornadoOctopus` takes several configuration options:
+
+* `concurrency`: number of maximum async http requests to use to retrieve URLs (defaults to 10 requests);
+* `auto_start`: Indicates whether the ioloop should be created automatically (defaults to False);
+* `cache`: If set to `True`, responses will be cached for the number of seconds specified in `expiration_in_seconds` (defaults to False);
+* `expiration_in_seconds`: The number of seconds to keep url responses in the local cache (defaults to 30 seconds);
+* `request_timeout_in_seconds`: The number of seconds that each request can take (defaults to 10 seconds).
+* `connect_timeout_in_seconds`: The number of seconds that each connection can take (defaults to 5 seconds).
+
+TornadoOctopus.start()
+---------------
+
+If `auto_start` is set to `False`, this method must be called to create the IOLoop instance. This is a **non-blocking** method.
+
+TornadoOctopus.enqueue(url, handler, method="GET", **kwargs)
+------------------------------------------------------------
+
+This is the main method in the `TornadoOctopus` class. This method is used to enqueue new URLs. The handler argument specifies the method to be called when the response is available.
+
+The handler takes the form `handler(url, response)`. The response argument is a Octopus.Response instance.
+
+You can specify a different method using the `method` argument (`POST`, `HEAD`, etc) and you can pass extra keyword arguments to the `AsyncHTTPClient.fetch` method using the keyword arguments for this method.
+
+This is a **non-blocking** method.
+
+TornadoOctopus.queue_size
+-------------------------
+
+This property returns the number of URLs still in the queue (not retrieved yet).
+
+TornadoOctopus.is_empty
+-----------------------
+
+This property returns if the URL queue is empty.
+
+TornadoOctopus.wait(timeout=10)
+-------------------------------
+
+In order for the IOLoop to handle callbacks, you **MUST** call wait. This is the method that gets the IOLoop to run.
+
+If you specify a `timeout` of `0`, `octopus` will wait until the queue is empty, no matter how long it takes.
 
 This is a **blocking** method.
 
