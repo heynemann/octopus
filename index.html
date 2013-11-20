@@ -1,45 +1,34 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
   <head>
-    <meta charset="utf-8">
+    <meta charset='utf-8'>
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <title>Octopus by heynemann</title>
-    <link rel="stylesheet" href="stylesheets/styles.css">
-    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-    <script src="javascripts/main.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link href='https://fonts.googleapis.com/css?family=Architects+Daughter' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print" />
+
     <!--[if lt IE 9]>
-      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
 
+    <title>Octopus by heynemann</title>
   </head>
+
   <body>
-      <div class="dococ"><span></span><div></div></div>
-      <header>
+    <header>
+      <div class="inner">
         <h1>Octopus</h1>
-        <p>octopus is a library to use threads to concurrently retrieve and report on the completion of http requests</p>
-      </header>
+        <h2>octopus is a library to use threads to concurrently retrieve and report on the completion of http requests</h2>
+        <a href="https://github.com/heynemann/octopus" class="button"><small>View project on</small>GitHub</a>
+      </div>
+    </header>
 
-      <div id="banner">
-        <span id="logo"></span>
-
-        <a href="https://github.com/heynemann/octopus" class="button fork"><strong>View On GitHub</strong></a>
-        <div class="downloads">
-          <span>Downloads:</span>
-          <ul>
-            <li><a href="https://github.com/heynemann/octopus/zipball/master" class="button">ZIP</a></li>
-            <li><a href="https://github.com/heynemann/octopus/tarball/master" class="button">TAR</a></li>
-          </ul>
-        </div>
-      </div><!-- end banner -->
-
-    <div class="wrapper">
-      <nav>
-        <ul></ul>
-      </nav>
-      <section>
-        <h1>
+    <div id="content-wrapper">
+      <div class="inner clearfix">
+        <section id="main-content">
+          <h1>
 <a name="octopus" class="anchor" href="#octopus"><span class="octicon octicon-link"></span></a>octopus</h1>
 
 <p><a href="https://travis-ci.org/heynemann/octopus"><img src="https://travis-ci.org/heynemann/octopus.png?branch=master" alt="Build Status"></a>
@@ -160,7 +149,9 @@ otto = Octopus()
 <p>If <code>auto_start</code> is set to <code>False</code>, this method must be called to start retrieving URLs. This is a <strong>non-blocking</strong> method.</p>
 
 <h2>
-<a name="octopusenqueueurl-handler-methodget-kwargs" class="anchor" href="#octopusenqueueurl-handler-methodget-kwargs"><span class="octicon octicon-link"></span></a>Octopus.enqueue(url, handler, method="GET", **kwargs)</h2>
+<a name="octopusenqueue" class="anchor" href="#octopusenqueue"><span class="octicon octicon-link"></span></a>Octopus.enqueue</h2>
+
+<p>Takes as arguments (url, handler, method="GET", **kwargs).</p>
 
 <p>This is the main method in the <code>Octopus</code> class. This method is used to enqueue new URLs. The handler argument specifies the method to be called when the response is available.</p>
 
@@ -222,7 +213,9 @@ otto = TornadoOctopus()
 <p>If <code>auto_start</code> is set to <code>False</code>, this method must be called to create the IOLoop instance. This is a <strong>non-blocking</strong> method.</p>
 
 <h2>
-<a name="tornadooctopusenqueueurl-handler-methodget-kwargs" class="anchor" href="#tornadooctopusenqueueurl-handler-methodget-kwargs"><span class="octicon octicon-link"></span></a>TornadoOctopus.enqueue(url, handler, method="GET", **kwargs)</h2>
+<a name="tornadooctopusenqueue" class="anchor" href="#tornadooctopusenqueue"><span class="octicon octicon-link"></span></a>TornadoOctopus.enqueue</h2>
+
+<p>Takes as arguments (url, handler, method="GET", **kwargs).</p>
 
 <p>This is the main method in the <code>TornadoOctopus</code> class. This method is used to enqueue new URLs. The handler argument specifies the method to be called when the response is available.</p>
 
@@ -283,14 +276,26 @@ RESULTS
 
 Overall, threaded octopus was more than 86 times faster than sequential requests and tornado octopus was more than 15 times faster than sequential requests.
 </code></pre>
-      </section>
-      <footer>
-        <p>Project maintained by <a href="https://github.com/heynemann">heynemann</a></p>
-        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://twitter.com/michigangraham">mattgraham</a></small></p>
-      </footer>
+        </section>
+
+        <aside id="sidebar">
+          <a href="https://github.com/heynemann/octopus/zipball/master" class="button">
+            <small>Download</small>
+            .zip file
+          </a>
+          <a href="https://github.com/heynemann/octopus/tarball/master" class="button">
+            <small>Download</small>
+            .tar.gz file
+          </a>
+
+          <p class="repo-owner"><a href="https://github.com/heynemann/octopus"></a> is maintained by <a href="https://github.com/heynemann">heynemann</a>.</p>
+
+          <p>This page was generated by <a href="pages.github.com">GitHub Pages</a> using the Architect theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.</p>
+        </aside>
+      </div>
     </div>
-    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
-              <script type="text/javascript">
+
+            <script type="text/javascript">
             var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
             document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
           </script>
