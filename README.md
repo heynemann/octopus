@@ -6,7 +6,9 @@ octopus
 [![PyPi downloads](https://pypip.in/d/octopus-http/badge.png)](https://crate.io/packages/octopus-http/)
 [![Coverage Status](https://coveralls.io/repos/heynemann/octopus/badge.png?branch=master)](https://coveralls.io/r/heynemann/octopus?branch=master)
 
-`octopus` is a library to use threads to concurrently retrieve and report on the completion of http requests
+`octopus` is a library to concurrently retrieve and report on the completion of http requests.
+
+You can either use threads or the tornado IOLoop to asynchronously get them.
 
 Installing
 ==========
@@ -20,7 +22,9 @@ The reason for the name of the package is that a package called `octopus` was al
 Using
 =====
 
-Using `octopus` is pretty simple:
+Using `octopus` with threads:
+
+    from octopus import Octopus
 
     # this Octopus instance we'll run 4 threads,
     # automatically start listening to the queue and
@@ -37,8 +41,43 @@ Using `octopus` is pretty simple:
 
     otto.wait()  # waits until queue is empty or timeout is ellapsed
 
+The analogous version with Tornado's IOLoop:
+
+    from octopus import TornadoOctopus
+
+    # this Octopus instance we'll run 4 concurrent requests max,
+    # automatically start listening to the queue and
+    # we'll in-memory cache responses for 10 seconds.
+    otto = TornadoOctopus(concurrency=4, auto_start=True, cache=True, expiration_in_seconds=10)
+
+    def handle_url_response(url, response):
+        # do something with response
+
+    otto.enqueue('http://www.google.com', handle_url_response)
+    otto.enqueue('http://www.facebook.com', handle_url_response)
+    otto.enqueue('http://www.yahoo.com', handle_url_response)
+    otto.enqueue('http://www.google.com', handle_url_response)  # will come from the cache
+
+    otto.wait()  # waits until queue is empty or timeout is ellapsed
+
 API Reference
 =============
+
+Response Class
+--------------
+
+The `Response` class is the result of all requests made with `Octopus` or `TornadoOctopus`.
+
+It has the following information:
+
+* url - the url that started the request;
+* status_code - the status code for the request;
+* cookies - dictionary with request cookie values;
+* headers - dictionary with response headers;
+* text - the body of the response;
+* effective_url - in the case of redirects, this url might be different than url;
+* error - if an error has occurred this is where the error message will be;
+* request_time - the time ellapsed between the start and the end of the request in seconds.
 
 Octopus Class
 -------------
