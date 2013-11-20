@@ -120,7 +120,11 @@ class Octopus(object):
                         error=err
                     )
 
+                original_response = response
+
                 response = self.from_requests_response(url, response)
+
+                original_response.close()
 
                 if self.cache:
                     self.response_cache.put(url, response)
