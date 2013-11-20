@@ -30,12 +30,6 @@ $(document).ready(function(){
   sectionHeight();
   
   $('img').load(sectionHeight);
-
-  var wrapper = $('.wrapper');
-  var right = wrapper.offset().left + wrapper.width();
-  console.log(right);
-  var dococ = $('.dococ');
-  dococ.css('left', right);
 });
 
 fixScale = function(doc) {

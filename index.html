@@ -15,7 +15,6 @@
 
   </head>
   <body>
-      <div class="dococ"><span></span><div></div></div>
 
       <header>
         <h1>Octopus</h1>
@@ -48,7 +47,9 @@
 <a href="https://crate.io/packages/octopus-http/"><img src="https://pypip.in/d/octopus-http/badge.png" alt="PyPi downloads"></a>
 <a href="https://coveralls.io/r/heynemann/octopus?branch=master"><img src="https://coveralls.io/repos/heynemann/octopus/badge.png?branch=master" alt="Coverage Status"></a></p>
 
-<p><code>octopus</code> is a library to use threads to concurrently retrieve and report on the completion of http requests</p>
+<p><code>octopus</code> is a library to concurrently retrieve and report on the completion of http requests.</p>
+
+<p>You can either use threads or the tornado IOLoop to asynchronously get them.</p>
 
 <h1>
 <a name="installing" class="anchor" href="#installing"><span class="octicon octicon-link"></span></a>Installing</h1>
@@ -63,12 +64,34 @@
 <h1>
 <a name="using" class="anchor" href="#using"><span class="octicon octicon-link"></span></a>Using</h1>
 
-<p>Using <code>octopus</code> is pretty simple:</p>
+<p>Using <code>octopus</code> with threads:</p>
 
-<pre><code># this Octopus instance we'll run 4 threads,
+<pre><code>from octopus import Octopus
+
+# this Octopus instance we'll run 4 threads,
 # automatically start listening to the queue and
 # we'll in-memory cache responses for 10 seconds.
 otto = Octopus(concurrency=4, auto_start=True, cache=True, expiration_in_seconds=10)
+
+def handle_url_response(url, response):
+    # do something with response
+
+otto.enqueue('http://www.google.com', handle_url_response)
+otto.enqueue('http://www.facebook.com', handle_url_response)
+otto.enqueue('http://www.yahoo.com', handle_url_response)
+otto.enqueue('http://www.google.com', handle_url_response)  # will come from the cache
+
+otto.wait()  # waits until queue is empty or timeout is ellapsed
+</code></pre>
+
+<p>The analogous version with Tornado's IOLoop:</p>
+
+<pre><code>from octopus import TornadoOctopus
+
+# this Octopus instance we'll run 4 concurrent requests max,
+# automatically start listening to the queue and
+# we'll in-memory cache responses for 10 seconds.
+otto = TornadoOctopus(concurrency=4, auto_start=True, cache=True, expiration_in_seconds=10)
 
 def handle_url_response(url, response):
     # do something with response
@@ -85,9 +108,33 @@ otto.wait()  # waits until queue is empty or timeout is ellapsed
 <a name="api-reference" class="anchor" href="#api-reference"><span class="octicon octicon-link"></span></a>API Reference</h1>
 
 <h2>
+<a name="response-class" class="anchor" href="#response-class"><span class="octicon octicon-link"></span></a>Response Class</h2>
+
+<p>The <code>Response</code> class is the result of all requests made with <code>Octopus</code> or <code>TornadoOctopus</code>.</p>
+
+<p>It has the following information:</p>
+
+<ul>
+<li>
+<code>url</code> - the url that started the request;</li>
+<li>
+<code>status_code</code> - the status code for the request;</li>
+<li>
+<code>cookies</code> - dictionary with request cookie values;</li>
+<li>
+<code>headers</code> - dictionary with response headers;</li>
+<li>
+<code>text</code> - the body of the response;</li>
+<li>
+<code>effective_url</code> - in the case of redirects, this url might be different than url;</li>
+<li>
+<code>error</code> - if an error has occurred this is where the error message will be;</li>
+<li>
+<code>request_time</code> - the time ellapsed between the start and the end of the request in seconds.</li>
+</ul><h2>
 <a name="octopus-class" class="anchor" href="#octopus-class"><span class="octicon octicon-link"></span></a>Octopus Class</h2>
 
-<p>This is the main unit of work in <code>octopus</code>. To enqueue new urls you need to have an <code>Octopus</code> instance:</p>
+<p>This is the main unit of work in <code>octopus</code> if you want to use threads. To enqueue new urls you need to have an <code>Octopus</code> instance:</p>
 
 <pre><code>from octopus import Octopus
 
@@ -104,7 +151,9 @@ otto = Octopus()
 <li>
 <code>cache</code>: If set to <code>True</code>, responses will be cached for the number of seconds specified in <code>expiration_in_seconds</code> (defaults to False);</li>
 <li>
-<code>expiration_in_seconds</code>: The number of seconds to keep url responses in the local cache (defaults to 30).</li>
+<code>expiration_in_seconds</code>: The number of seconds to keep url responses in the local cache (defaults to 30 seconds);</li>
+<li>
+<code>request_timeout_in_seconds</code>: The number of seconds that each request can take (defaults to 5 seconds).</li>
 </ul><h2>
 <a name="octopusstart" class="anchor" href="#octopusstart"><span class="octicon octicon-link"></span></a>Octopus.start()</h2>
 
@@ -115,7 +164,7 @@ otto = Octopus()
 
 <p>This is the main method in the <code>Octopus</code> class. This method is used to enqueue new URLs. The handler argument specifies the method to be called when the response is available.</p>
 
-<p>The handler takes the form <code>handler(url, response)</code>. The response argument is a <a href="http://www.python-requests.org/en/latest/api/#requests.Response">Response</a> instance.</p>
+<p>The handler takes the form <code>handler(url, response)</code>. The response argument is a Octopus.Response instance.</p>
 
 <p>You can specify a different method using the <code>method</code> argument (<code>POST</code>, <code>HEAD</code>, etc) and you can pass extra keyword arguments to the <code>requests.request</code> method using the keyword arguments for this method.</p>
 
@@ -138,7 +187,67 @@ otto = Octopus()
 
 <p>If you specify a <code>timeout</code> of <code>0</code>, <code>octopus</code> will wait until the queue is empty, no matter how long it takes.</p>
 
-<p>If a timeout occurs, this method raises <code>Octopus.TimeoutError</code>.</p>
+<p>This is a <strong>blocking</strong> method.</p>
+
+<h2>
+<a name="tornadooctopus-class" class="anchor" href="#tornadooctopus-class"><span class="octicon octicon-link"></span></a>TornadoOctopus Class</h2>
+
+<p>This is the main unit of work in <code>octopus</code> if you want to use Tornado's IOLoop. To enqueue new urls you need to have an <code>TornadoOctopus</code> instance:</p>
+
+<pre><code>from octopus import TornadoOctopus
+
+otto = TornadoOctopus()
+</code></pre>
+
+<p>A <strong>very important</strong> thing that differs from the threaded version of Octopus is that you <strong>MUST</strong> call wait to get the responses, since Tornado IOLoop needs to be run in order to get the requests.</p>
+
+<p>The constructor for <code>TornadoOctopus</code> takes several configuration options:</p>
+
+<ul>
+<li>
+<code>concurrency</code>: number of maximum async http requests to use to retrieve URLs (defaults to 10 requests);</li>
+<li>
+<code>auto_start</code>: Indicates whether the ioloop should be created automatically (defaults to False);</li>
+<li>
+<code>cache</code>: If set to <code>True</code>, responses will be cached for the number of seconds specified in <code>expiration_in_seconds</code> (defaults to False);</li>
+<li>
+<code>expiration_in_seconds</code>: The number of seconds to keep url responses in the local cache (defaults to 30 seconds);</li>
+<li>
+<code>request_timeout_in_seconds</code>: The number of seconds that each request can take (defaults to 10 seconds).</li>
+<li>
+<code>connect_timeout_in_seconds</code>: The number of seconds that each connection can take (defaults to 5 seconds).</li>
+</ul><h2>
+<a name="tornadooctopusstart" class="anchor" href="#tornadooctopusstart"><span class="octicon octicon-link"></span></a>TornadoOctopus.start()</h2>
+
+<p>If <code>auto_start</code> is set to <code>False</code>, this method must be called to create the IOLoop instance. This is a <strong>non-blocking</strong> method.</p>
+
+<h2>
+<a name="tornadooctopusenqueueurl-handler-methodget-kwargs" class="anchor" href="#tornadooctopusenqueueurl-handler-methodget-kwargs"><span class="octicon octicon-link"></span></a>TornadoOctopus.enqueue(url, handler, method="GET", **kwargs)</h2>
+
+<p>This is the main method in the <code>TornadoOctopus</code> class. This method is used to enqueue new URLs. The handler argument specifies the method to be called when the response is available.</p>
+
+<p>The handler takes the form <code>handler(url, response)</code>. The response argument is a Octopus.Response instance.</p>
+
+<p>You can specify a different method using the <code>method</code> argument (<code>POST</code>, <code>HEAD</code>, etc) and you can pass extra keyword arguments to the <code>AsyncHTTPClient.fetch</code> method using the keyword arguments for this method.</p>
+
+<p>This is a <strong>non-blocking</strong> method.</p>
+
+<h2>
+<a name="tornadooctopusqueue_size" class="anchor" href="#tornadooctopusqueue_size"><span class="octicon octicon-link"></span></a>TornadoOctopus.queue_size</h2>
+
+<p>This property returns the number of URLs still in the queue (not retrieved yet).</p>
+
+<h2>
+<a name="tornadooctopusis_empty" class="anchor" href="#tornadooctopusis_empty"><span class="octicon octicon-link"></span></a>TornadoOctopus.is_empty</h2>
+
+<p>This property returns if the URL queue is empty.</p>
+
+<h2>
+<a name="tornadooctopuswaittimeout10" class="anchor" href="#tornadooctopuswaittimeout10"><span class="octicon octicon-link"></span></a>TornadoOctopus.wait(timeout=10)</h2>
+
+<p>In order for the IOLoop to handle callbacks, you <strong>MUST</strong> call wait. This is the method that gets the IOLoop to run.</p>
+
+<p>If you specify a <code>timeout</code> of <code>0</code>, <code>octopus</code> will wait until the queue is empty, no matter how long it takes.</p>
 
 <p>This is a <strong>blocking</strong> method.</p>
 
@@ -164,12 +273,15 @@ RESULTS
 
 [requests] Retrieving 2000 urls took 2692.66 seconds meaning 0.74 urls/second.
 
-[octopus] Retrieving 2000 urls took 33.56 seconds meaning 59.59 urls/second.
+[octopus] Retrieving 2000 urls took 31.14 seconds meaning 64.22 urls/second.
 
-[octopus] Retrieving 2000 urls with local in-memory caching took 2.43 seconds 
-meaning 821.95 urls/second.
+[octopus] Retrieving 2000 urls with local in-memory caching took 6.61 seconds meaning 302.50 urls/second.
 
-Overall, octopus was more than 80.00 times faster than sequential requests.
+[octopus-tornado] Retrieving 2000 urls took 167.99 seconds meaning 11.91 urls/second.
+
+[octopus-tornado-pycurl] Retrieving 2000 urls took 171.40 seconds meaning 11.67 urls/second.
+
+Overall, threaded octopus was more than 86 times faster than sequential requests and tornado octopus was more than 15 times faster than sequential requests.
 </code></pre>
       </section>
       <footer>
