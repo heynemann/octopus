@@ -47,10 +47,6 @@ class TornadoOctopus(object):
         self.ioloop = IOLoop()
         self.http_client = AsyncHTTPClient(io_loop=self.ioloop)
 
-    def start_ioloop(self, ioloop):
-        logging.debug('Starting IOLoop...')
-        ioloop.start()
-
     @classmethod
     def from_tornado_response(cls, url, response):
         cookies = response.request.headers.get('Cookie', '')
