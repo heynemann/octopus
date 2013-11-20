@@ -101,8 +101,10 @@ Octopus.start()
 
 If `auto_start` is set to `False`, this method must be called to start retrieving URLs. This is a **non-blocking** method.
 
-Octopus.enqueue(url, handler, method="GET", **kwargs)
------------------------------------------------------
+Octopus.enqueue
+---------------
+
+Takes as arguments (url, handler, method="GET", **kwargs).
 
 This is the main method in the `Octopus` class. This method is used to enqueue new URLs. The handler argument specifies the method to be called when the response is available.
 
@@ -156,8 +158,10 @@ TornadoOctopus.start()
 
 If `auto_start` is set to `False`, this method must be called to create the IOLoop instance. This is a **non-blocking** method.
 
-TornadoOctopus.enqueue(url, handler, method="GET", **kwargs)
-------------------------------------------------------------
+TornadoOctopus.enqueue
+----------------------
+
+Takes as arguments (url, handler, method="GET", **kwargs).
 
 This is the main method in the `TornadoOctopus` class. This method is used to enqueue new URLs. The handler argument specifies the method to be called when the response is available.
 
