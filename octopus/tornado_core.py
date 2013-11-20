@@ -3,8 +3,12 @@
 
 import logging
 
-from tornado.ioloop import IOLoop
-from tornado.httpclient import AsyncHTTPClient, HTTPRequest
+try:
+    from tornado.ioloop import IOLoop
+    from tornado.httpclient import AsyncHTTPClient, HTTPRequest
+except ImportError:
+    print("Can't import tornado. Probably setup.py installing package.")
+
 try:
     import pycurl  # NOQA
     PYCURL_AVAILABLE = True
