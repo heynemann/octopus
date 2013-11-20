@@ -114,14 +114,6 @@ class Octopus(object):
             if response is None:
                 try:
                     response = requests.request(method, url, timeout=self.request_timeout_in_seconds, **kwargs)
-                except requests.ConnectionError:
-                    err = sys.exc_info()[1]
-                    response = ResponseError(
-                        url=url,
-                        status_code=500,
-                        text=str(err),
-                        error=err
-                    )
                 except requests.exceptions.Timeout:
                     err = sys.exc_info()[1]
                     response = ResponseError(

@@ -5,9 +5,8 @@ import sys
 
 from preggy import expect
 from mock import Mock
-import requests.exceptions
 
-from octopus import Octopus, TimeoutError, ResponseError
+from octopus import Octopus, TimeoutError
 from tests import TestCase
 
 
@@ -105,9 +104,9 @@ class TestOctopus(TestCase):
     def test_can_handle_more_urls_concurrently(self):
         urls = [
             'http://www.google.com',
-            'http://www.globo.com',
             'http://www.cnn.com',
-            'http://www.bbc.com'
+            'http://www.bbc.com',
+            'http://www.facebook.com'
         ]
         otto = Octopus(concurrency=4)
 
@@ -176,11 +175,10 @@ class TestOctopus(TestCase):
         otto.wait(5)
 
         expect(self.response).not_to_be_null()
-        expect(self.response).to_be_instance_of(ResponseError)
-        expect(self.response.status_code).to_equal(500)
-        expect(self.response.body).to_include("HTTPConnectionPool(host='kagdjdkjgka.fk', port=80)")
-        expect(self.response.body).to_include('Max retries exceeded with url: /')
-        expect(self.response.error).to_be_instance_of(requests.exceptions.ConnectionError)
+        expect(self.response.status_code).to_equal(599)
+        expect(self.response.text).to_include("HTTPConnectionPool(host='kagdjdkjgka.fk', port=80)")
+        expect(self.response.text).to_include('Max retries exceeded with url: /')
+        expect(self.response.error).to_equal(self.response.text)
 
     def test_can_handle_timeouts(self):
         url = 'http://baidu.com'
@@ -195,5 +193,5 @@ class TestOctopus(TestCase):
 
         otto.wait(5)
 
-        expect(self.response.body).to_include('Connection to baidu.com timed out')
-        expect(self.response.error).to_be_instance_of(requests.exceptions.Timeout)
+        expect(self.response.text).to_include('Connection to baidu.com timed out')
+        expect(self.response.error).to_include('Connection to baidu.com timed out. (connect timeout=0.1)')
