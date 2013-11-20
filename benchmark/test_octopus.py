@@ -157,7 +157,7 @@ def tornado_requests(repetitions, concurrency, urls_to_retrieve, ignore_pycurl=F
     print("=" * len(message))
     print
 
-    otto = TornadoOctopus(concurrency=concurrency, cache=True, auto_start=True, ignore_pycurl=ignore_pycurl)
+    otto = TornadoOctopus(concurrency=concurrency, cache=False, auto_start=True, ignore_pycurl=ignore_pycurl)
 
     for url in urls_to_retrieve:
         otto.enqueue(url, handle_url_response)
