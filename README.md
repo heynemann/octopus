@@ -70,14 +70,14 @@ The `Response` class is the result of all requests made with `Octopus` or `Torna
 
 It has the following information:
 
-* url - the url that started the request;
-* status_code - the status code for the request;
-* cookies - dictionary with request cookie values;
-* headers - dictionary with response headers;
-* text - the body of the response;
-* effective_url - in the case of redirects, this url might be different than url;
-* error - if an error has occurred this is where the error message will be;
-* request_time - the time ellapsed between the start and the end of the request in seconds.
+* `url` - the url that started the request;
+* `status_code` - the status code for the request;
+* `cookies` - dictionary with request cookie values;
+* `headers` - dictionary with response headers;
+* `text` - the body of the response;
+* `effective_url` - in the case of redirects, this url might be different than url;
+* `error` - if an error has occurred this is where the error message will be;
+* `request_time` - the time ellapsed between the start and the end of the request in seconds.
 
 Octopus Class
 -------------
