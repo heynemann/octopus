@@ -117,21 +117,26 @@ class TornadoOctopus(object):
 
     def handle_request(self, url, callback):
         def handle(response):
+            self.running_urls -= 1
+
             response = self.from_tornado_response(url, response)
             logging.info('Got response(%s) from %s.' % (response.status_code, url))
 
-            if self.cache:
+            if self.cache and response and response.status_code < 399:
                 logging.debug('Putting %s into cache.' % url)
                 self.response_cache.put(url, response)
 
-            self.running_urls -= 1
-            callback(url, response)
+            try:
+                callback(url, response)
+            except Exception:
+                logging.exception('Error calling callback for %s.' % url)
 
             if self.running_urls < self.concurrency and self.url_queue:
                 request_url, handler, method, kw = self.url_queue.pop()
                 logging.debug('Queue has space available for fetching %s.' % request_url)
                 self.fetch(request_url, handler, method, **kw)
 
+            logging.debug('Getting %d urls and still have %d more urls to get...' % (self.running_urls, len(self.url_queue)))
             if self.running_urls < 1:
                 logging.debug('Nothing else to get. Stopping Octopus...')
                 self.stop()
