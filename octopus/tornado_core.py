@@ -100,6 +100,7 @@ class TornadoOctopus(object):
 
             if response is not None:
                 logging.debug('Cache hit on %s.' % url)
+                self.running_urls -= 1
                 handler(url, response)
                 return
 

@@ -165,7 +165,7 @@ class TestTornadoOctopus(TestCase):
 
         otto.fetch('http://www.google.com', callback, 'GET')
 
-        expect(otto.running_urls).to_equal(1)
+        expect(otto.running_urls).to_equal(0)
         expect(http_client_mock.fetch.called).to_be_false()
         callback.assert_called_once_with('http://www.google.com', response_mock)
 
