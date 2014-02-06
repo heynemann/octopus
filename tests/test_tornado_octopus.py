@@ -135,11 +135,24 @@ class TestTornadoOctopus(TestCase):
             self.url = url
             self.response = response
 
-        otto.enqueue('http://www.google.com', response, method='GET', something="else")
+        otto.enqueue('http://www.google.com', response, method='GET')
 
         expect(otto.url_queue).to_be_empty()
         expect(self.response).not_to_be_null()
         expect(self.response).to_equal(mock_response)
+
+    def test_can_enqueue_and_get_when_cache_miss(self):
+        otto = TornadoOctopus(cache=True, auto_start=True)
+
+        def response(url, response):
+            self.url = url
+            self.response = response
+
+        otto.enqueue('http://www.google.com', response, method='GET')
+        otto.wait(2)
+
+        expect(otto.url_queue).to_be_empty()
+        expect(self.response).not_to_be_null()
 
     def test_can_fetch(self):
         otto = TornadoOctopus(cache=False, auto_start=True)
@@ -286,9 +299,8 @@ class TestTornadoOctopus(TestCase):
 
     def test_can_get_many_urls(self):
         urls = [
+            'http://www.globo.com',
             'http://www.twitter.com',
-            'http://www.cnn.com',
-            'http://www.bbc.com',
             'http://www.facebook.com'
         ]
         otto = TornadoOctopus(concurrency=4, auto_start=True)
@@ -301,7 +313,7 @@ class TestTornadoOctopus(TestCase):
 
         otto.wait(2)
 
-        expect(self.responses).to_length(4)
+        expect(self.responses).to_length(3)
 
         for url in urls:
             expect(self.responses).to_include(url)
@@ -337,3 +349,18 @@ class TestTornadoOctopus(TestCase):
         expect(self.response.status_code).to_equal(599)
         expect(self.response.text).to_be_null()
         expect(self.response.error).not_to_be_null()
+
+    @patch.object(logging, 'exception')
+    def test_can_handle_exception(self, log_mock):
+        url = 'http://www.globo.com'
+
+        otto = TornadoOctopus(concurrency=4, auto_start=True)
+
+        def handle_url_response(url, response):
+            raise RuntimeError(url)
+
+        otto.enqueue(url, handle_url_response)
+
+        otto.wait(2)
+
+        log_mock.assert_called_once_with('Error calling callback for http://www.globo.com.')
