@@ -105,6 +105,7 @@ The constructor for `Octopus` takes several configuration options:
 * `cache`: If set to `True`, responses will be cached for the number of seconds specified in `expiration_in_seconds` (defaults to False);
 * `expiration_in_seconds`: The number of seconds to keep url responses in the local cache (defaults to 30 seconds);
 * `request_timeout_in_seconds`: The number of seconds that each request can take (defaults to 5 seconds).
+* `limiter`: The instance of a limiter class to use to acquire limits (more on limits below).
 
 Octopus.start()
 ---------------
@@ -162,6 +163,7 @@ The constructor for `TornadoOctopus` takes several configuration options:
 * `expiration_in_seconds`: The number of seconds to keep url responses in the local cache (defaults to 30 seconds);
 * `request_timeout_in_seconds`: The number of seconds that each request can take (defaults to 10 seconds).
 * `connect_timeout_in_seconds`: The number of seconds that each connection can take (defaults to 5 seconds).
+* `limiter`: The instance of a limiter class to use to acquire limits (more on limits below).
 
 TornadoOctopus.start()
 ---------------
