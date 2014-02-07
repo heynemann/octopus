@@ -208,7 +208,7 @@ does not happen, Octopus allows users to specify a limiter class.
 
 Each limiter class has to provide two methods `acquire` and `release`, both taking an URL as argument.
 
-Octopus comes bundled with an in-memory limiter and a redis limiter (courtesy of the [retools project](https://github.com/bbangert/retools)). Using limiters is a simple as passing it to octopus constructor:
+Octopus comes bundled with an in-memory limiter and a redis limiter (courtesy of the [retools project](https://github.com/bbangert/retools)). Using limiters is as simple as passing it to octopus constructor:
 
     from octopus import TornadoOctopus
     from octopus.limiter.in_memory.per_domain import Limiter
@@ -227,10 +227,11 @@ Octopus comes bundled with an in-memory limiter and a redis limiter (courtesy of
 
 The available built-in limiters are:
 
-* octopus.limiter.in_memory.per_domain.Limiter
-* octopus.limiter.redis.per_domain.Limiter
+* `octopus.limiter.in_memory.per_domain.Limiter`
+* `octopus.limiter.redis.per_domain.Limiter`
 
-Both take a list of dictionaries with keys being the beginning of the URL and value being the allowed concurrent connections.
+Both take a list of dictionaries with the key being the beginning of the URL and value being the allowed concurrent connections.
+
 The reason this is a list is that urls defined first take precedence. This allows users to single out a path in a domain that needs less connections than the rest of the domain, like this:
 
     # using in-memory limiter. Domains not specified here have no limit.
@@ -239,8 +240,9 @@ The reason this is a list is that urls defined first take precedence. This allow
         {'http://g1.globo.com': 20},  # only 20 concurrent requests to the rest of the domain
     )
 
-The redis limiter takes two additional keyword arguments: `redis` (a redis.py connection to redis)
-and `expiration_in_seconds` (the expiration for locks in the limiter).
+The redis limiter takes two additional keyword arguments:
+ `redis` (a [redis.py](https://github.com/andymccurdy/redis-py) connection to redis)
+ and `expiration_in_seconds` (the expiration for locks in the limiter).
 
 Benchmark
 =========
