@@ -27,7 +27,7 @@ class Limiter(object):
     def acquire(self, url):
         domain = self.get_domain_from_url(url)
         if domain is None:
-            logging.info('Tried to acquire lock to a domain that was not specified in the limiter.')
+            logging.info('Tried to acquire lock to a domain that was not specified in the limiter (%s).' % url)
             return True
 
         limit = self.get_domain_limit(url)
@@ -41,7 +41,7 @@ class Limiter(object):
     def release(self, url):
         domain = self.get_domain_from_url(url)
         if domain is None:
-            logging.info('Tried to release lock to a domain that was not specified in the limiter.')
-            return True
+            logging.info('Tried to release lock to a domain that was not specified in the limiter (%s).' % url)
+            return
 
         self.domain_count[domain] -= 1

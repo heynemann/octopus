@@ -30,7 +30,7 @@ class Limiter(InMemoryPerDomainLimiter):
     def acquire(self, url):
         domain = self.get_domain_from_url(url)
         if domain is None:
-            logging.info('Tried to acquire lock to a domain that was not specified in the limiter.')
+            logging.info('Tried to acquire lock to a domain that was not specified in the limiter (%s).' % url)
             return True
 
         return self.limiters[domain].acquire_limit(url)
@@ -39,7 +39,7 @@ class Limiter(InMemoryPerDomainLimiter):
         domain = self.get_domain_from_url(url)
 
         if domain is None:
-            logging.info('Tried to release lock to a domain that was not specified in the limiter.')
+            logging.info('Tried to release lock to a domain that was not specified in the limiter (%s).' % url)
             return True
 
         self.limiters[domain].release_limit(url)
