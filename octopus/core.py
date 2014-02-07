@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import logging
 import sys
-from time import time
+import time
 from datetime import timedelta
 from threading import Thread
 
@@ -24,9 +25,9 @@ try:
         def join_with_timeout(self, timeout):
             self.all_tasks_done.acquire()
             try:
-                endtime = time() + timeout
+                endtime = time.time() + timeout
                 while self.unfinished_tasks:
-                    remaining = endtime - time()
+                    remaining = endtime - time.time()
                     if remaining <= 0.0:
                         raise TimeoutError
                     self.all_tasks_done.wait(remaining)
@@ -57,7 +58,11 @@ class ResponseError(object):
 
 
 class Octopus(object):
-    def __init__(self, concurrency=10, auto_start=False, cache=False, expiration_in_seconds=30, request_timeout_in_seconds=5):
+    def __init__(
+            self, concurrency=10, auto_start=False, cache=False,
+            expiration_in_seconds=30, request_timeout_in_seconds=5, limiter=None
+            ):
+
         self.concurrency = concurrency
         self.auto_start = auto_start
 
@@ -66,6 +71,7 @@ class Octopus(object):
         self.request_timeout_in_seconds = request_timeout_in_seconds
 
         self.url_queue = OctopusQueue()
+        self.limiter = limiter
 
         if auto_start:
             self.start()
@@ -112,6 +118,13 @@ class Octopus(object):
                 response = self.response_cache.get(url)
 
             if response is None:
+                if self.limiter and not self.limiter.acquire(url):
+                    logging.info('Could not acquire limit for url "%s".' % url)
+                    self.url_queue.task_done()
+                    self.url_queue.put_nowait((url, handler, method, kwargs))
+                    time.sleep(0.1)
+                    continue
+
                 try:
                     response = requests.request(method, url, timeout=self.request_timeout_in_seconds, **kwargs)
                 except requests.exceptions.Timeout:
@@ -131,6 +144,9 @@ class Octopus(object):
                         text=str(err),
                         error=err
                     )
+                finally:
+                    if self.limiter:
+                        self.limiter.release(url)
 
                 original_response = response
 
