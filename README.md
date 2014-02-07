@@ -244,7 +244,7 @@ The redis limiter takes two additional keyword arguments:
  `redis` (a [redis.py](https://github.com/andymccurdy/redis-py) connection to redis)
  and `expiration_in_seconds` (the expiration for locks in the limiter).
 
-**WARNING**: The in-memory limiter IS NOT thread-save, so if you are using Threaded Octopus, do not use this limiter.
+**WARNING**: The in-memory limiter **IS NOT** thread-safe, so if you are using Threaded Octopus, do not use this limiter.
 
 Benchmark
 =========
