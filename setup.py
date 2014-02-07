@@ -43,7 +43,8 @@ Octopus is a library to use threads to concurrently retrieve and report on the c
     install_requires=[
         'six',
         'requests',
-        'tornado'
+        'tornado',
+        'retools'
     ],
     extras_require={
         'tests': tests_require,

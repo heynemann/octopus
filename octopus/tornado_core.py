@@ -23,7 +23,8 @@ class TornadoOctopus(object):
     def __init__(
             self, concurrency=10, auto_start=False, cache=False,
             expiration_in_seconds=30, request_timeout_in_seconds=10,
-            connect_timeout_in_seconds=5, ignore_pycurl=False):
+            connect_timeout_in_seconds=5, ignore_pycurl=False,
+            limiter=None):
 
         self.concurrency = concurrency
         self.auto_start = auto_start
@@ -45,6 +46,8 @@ class TornadoOctopus(object):
         if auto_start:
             logging.debug('Auto starting...')
             self.start()
+
+        self.limiter = limiter
 
     @property
     def queue_size(self):
@@ -87,7 +90,7 @@ class TornadoOctopus(object):
 
         if self.running_urls < self.concurrency:
             logging.debug('Queue has space available for fetching %s.' % url)
-            self.fetch(url, handler, method, **kw)
+            self.get_next_url(url, handler, method, **kw)
         else:
             logging.debug('Queue is full. Enqueueing %s for future fetch.' % url)
             self.url_queue.append((url, handler, method, kw))
@@ -116,6 +119,18 @@ class TornadoOctopus(object):
 
         self.http_client.fetch(request, self.handle_request(url, handler))
 
+    def get_next_url(self, request_url=None, handler=None, method=None, **kw):
+        if request_url is None:
+            request_url, handler, method, kw = self.url_queue.pop()
+
+        if self.limiter and not self.limiter.acquire(request_url):
+            logging.info('Could not acquire limit for url "%s".' % request_url)
+            self.url_queue.append((request_url, handler, method, kw))
+            return
+
+        logging.debug('Queue has space available for fetching %s.' % request_url)
+        self.fetch(request_url, handler, method, **kw)
+
     def handle_request(self, url, callback):
         def handle(response):
             self.running_urls -= 1
@@ -127,15 +142,16 @@ class TornadoOctopus(object):
                 logging.debug('Putting %s into cache.' % url)
                 self.response_cache.put(url, response)
 
+            if self.limiter:
+                self.limiter.release(url)
+
             try:
                 callback(url, response)
             except Exception:
                 logging.exception('Error calling callback for %s.' % url)
 
             if self.running_urls < self.concurrency and self.url_queue:
-                request_url, handler, method, kw = self.url_queue.pop()
-                logging.debug('Queue has space available for fetching %s.' % request_url)
-                self.fetch(request_url, handler, method, **kw)
+                self.get_next_url()
 
             logging.debug('Getting %d urls and still have %d more urls to get...' % (self.running_urls, len(self.url_queue)))
             if self.running_urls < 1:

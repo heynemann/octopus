@@ -3,6 +3,9 @@
 
 from unittest import TestCase as PythonTestCase
 
+import redis
+
 
 class TestCase(PythonTestCase):
-    pass
+    def setUp(self):
+        self.redis = redis.Redis(host='localhost', port=7575, db=0)
