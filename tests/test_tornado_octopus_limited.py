@@ -32,4 +32,4 @@ class TestInMemoryLimiter(TestCase):
         otto.wait(2)
 
         expect(self.responses).to_length(4)
-        expect(limiter.domain_count.keys()).to_be_like(['http://g1.globo.com', 'http://globoesporte.globo.com'])
+        expect(list(limiter.domain_count.keys())).to_be_like(['http://g1.globo.com', 'http://globoesporte.globo.com'])
