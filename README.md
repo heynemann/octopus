@@ -200,6 +200,48 @@ If you specify a `timeout` of `0`, `octopus` will wait until the queue is empty,
 
 This is a **blocking** method.
 
+Limiting Simultaneous Connections
+=================================
+
+A very common problem that can happen when using octopus is overwhelming the server you are going to. In order to make sure this
+does not happen, Octopus allows users to specify a limiter class.
+
+Each limiter class has to provide two methods `acquire` and `release`, both taking an URL as argument.
+
+Octopus comes bundled with an in-memory limiter and a redis limiter (courtesy of the [retools project](https://github.com/bbangert/retools)). Using limiters is a simple as passing it to octopus constructor:
+
+    from octopus import TornadoOctopus
+    from octopus.limiter.in_memory.per_domain import Limiter
+
+    # using in-memory limiter. Domains not specified here have no limit.
+    limiter = Limiter(
+        {'http://globo.com': 10},  # only 10 concurrent requests to this domain
+        {'http://g1.globo.com': 20},  # only 20 concurrent requests to this domain
+    )
+
+    otto = TornadoOctopus(
+        concurrency=4, auto_start=True, cache=True,
+        expiration_in_seconds=10,
+        limiter=limiter
+    )
+
+The available built-in limiters are:
+
+* octopus.limiter.in_memory.per_domain.Limiter
+* octopus.limiter.redis.per_domain.Limiter
+
+Both take a list of dictionaries with keys being the beginning of the URL and value being the allowed concurrent connections.
+The reason this is a list is that urls defined first take precedence. This allows users to single out a path in a domain that needs less connections than the rest of the domain, like this:
+
+    # using in-memory limiter. Domains not specified here have no limit.
+    limiter = Limiter(
+        {'http://g1.globo.com/economia': 5},  # only 5 concurrent requests to urls that begin with this key
+        {'http://g1.globo.com': 20},  # only 20 concurrent requests to the rest of the domain
+    )
+
+The redis limiter takes two additional keyword arguments: `redis` (a redis.py connection to redis)
+and `expiration_in_seconds` (the expiration for locks in the limiter).
+
 Benchmark
 =========
 
