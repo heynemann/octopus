@@ -39,7 +39,7 @@ class TestPerDomain(TestCase):
             {'http://globoesporte.globo.com': 10}
         )
 
-        expect(limiter.acquire('http://g1.globo.com/economia/')).to_be_true()
+        expect(limiter.acquire('http://g1.globo.com/economia/')).to_be_false()
         expect(limiter.domain_count).to_be_empty()
         logging_mock.assert_called_once_with('Tried to acquire lock to a domain that was not specified in the limiter (http://g1.globo.com/economia/).')
 
