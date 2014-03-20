@@ -28,6 +28,7 @@ class TornadoOctopus(object):
 
         self.concurrency = concurrency
         self.auto_start = auto_start
+        self.last_timeout = None
 
         self.cache = cache
         self.response_cache = Cache(expiration_in_seconds=expiration_in_seconds)
@@ -162,9 +163,10 @@ class TornadoOctopus(object):
 
     def handle_wait_timeout(self, signal_number, frames):
         logging.debug('Timeout waiting for IOLoop to finish. Stopping IOLoop manually.')
-        self.ioloop.stop()
+        self.ioloop.stop(force=True)
 
     def wait(self, timeout=10):
+        self.last_timeout = timeout
         if not self.url_queue and not self.running_urls:
             logging.debug('No urls to wait for. Returning immediately.')
             return
@@ -177,6 +179,10 @@ class TornadoOctopus(object):
 
         self.ioloop.start()
 
-    def stop(self):
-        logging.debug('Stopping IOLoop...')
+    def stop(self, force=False):
+        logging.error('Stopping IOLoop...')
         self.ioloop.stop()
+
+        if not force and len(self.url_queue):
+            self.get_next_url()
+            self.wait(self.last_timeout)

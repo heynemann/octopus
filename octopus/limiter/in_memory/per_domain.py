@@ -32,7 +32,7 @@ class Limiter(BaseLimiter):
         if domain is None:
             logging.info('Tried to acquire lock to a domain that was not specified in the limiter (%s).' % url)
             self.publish_lock_miss(url)
-            return False
+            return True
 
         limit = self.get_domain_limit(url)
 
