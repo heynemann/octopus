@@ -180,7 +180,7 @@ class TornadoOctopus(object):
         self.ioloop.start()
 
     def stop(self, force=False):
-        logging.error('Stopping IOLoop...')
+        logging.info('Stopping IOLoop...')
         self.ioloop.stop()
 
         if not force and len(self.url_queue):
