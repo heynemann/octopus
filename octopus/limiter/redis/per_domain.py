@@ -39,6 +39,7 @@ class Limiter(InMemoryPerDomainLimiter):
 
         if not could_lock:
             self.publish_lock_miss(url)
+            logging.info('Tried to acquire lock for %s but could not.' % url)
 
         return could_lock
 
