@@ -248,6 +248,21 @@ The redis limiter takes two additional keyword arguments:
 
 **WARNING**: The in-memory limiter **IS NOT** thread-safe, so if you are using Threaded Octopus, do not use this limiter.
 
+If you'd like to do something when the limiter misses a lock (i.e.: no more connections allowed), just subscribe to it in the limiter using:
+
+    # using in-memory limiter. Domains not specified here have no limit.
+    limiter = Limiter(
+        {'http://g1.globo.com/economia': 5},  # only 5 concurrent requests to urls that begin with this key
+        {'http://g1.globo.com': 20},  # only 20 concurrent requests to the rest of the domain
+    )
+
+    def handle_lock_miss(url):
+        # do something with the miss
+        pass
+
+    limiter.subscribe_to_lock_miss(handle_lock_miss)
+
+
 Benchmark
 =========
 
