@@ -8,7 +8,11 @@ from octopus.limiter import Limiter as BaseLimiter
 
 
 class Limiter(BaseLimiter):
-    def __init__(self, limiter_miss_timeout_ms=None, *domains):
+    def __init__(self, *domains, **kw):
+        limiter_miss_timeout_ms = None
+        if 'limiter_miss_timeout_ms' in kw:
+            limiter_miss_timeout_ms = kw['limiter_miss_timeout_ms']
+
         super(Limiter, self).__init__(limiter_miss_timeout_ms=limiter_miss_timeout_ms)
         self.update_domain_definitions(*domains)
 
