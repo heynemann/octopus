@@ -122,6 +122,7 @@ class Octopus(object):
                     logging.info('Could not acquire limit for url "%s".' % url)
                     self.url_queue.task_done()
                     self.url_queue.put_nowait((url, handler, method, kwargs))
+                    self.limiter.publish_lock_miss(url)
                     time.sleep(0.1)
                     continue
 
