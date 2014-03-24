@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import logging
+from datetime import timedelta
 
 try:
     from tornado.ioloop import IOLoop
@@ -122,18 +123,30 @@ class TornadoOctopus(object):
 
     def get_next_url(self, request_url=None, handler=None, method=None, **kw):
         if request_url is None:
+            if not self.url_queue:
+                return
+
             request_url, handler, method, kw = self.url_queue.pop()
 
+        self.fetch_next_url(request_url, handler, method, **kw)
+
+    def fetch_next_url(self, request_url, handler, method, **kw):
         if self.limiter and not self.limiter.acquire(request_url):
             logging.info('Could not acquire limit for url "%s".' % request_url)
+
             self.url_queue.append((request_url, handler, method, kw))
-            return
+            deadline = timedelta(seconds=self.limiter.limiter_miss_timeout_ms / 1000.0)
+            self.ioloop.add_timeout(deadline, self.get_next_url)
+            self.limiter.publish_lock_miss(request_url)
+            return False
 
         logging.debug('Queue has space available for fetching %s.' % request_url)
         self.fetch(request_url, handler, method, **kw)
+        return True
 
     def handle_request(self, url, callback):
         def handle(response):
+            logging.debug('Handler called for url %s...' % url)
             self.running_urls -= 1
 
             response = self.from_tornado_response(url, response)
@@ -154,8 +167,8 @@ class TornadoOctopus(object):
             if self.running_urls < self.concurrency and self.url_queue:
                 self.get_next_url()
 
-            logging.debug('Getting %d urls and still have %d more urls to get...' % (self.running_urls, len(self.url_queue)))
-            if self.running_urls < 1:
+            logging.debug('Getting %d urls and still have %d more urls to get...' % (self.running_urls, self.remaining_requests))
+            if self.running_urls < 1 and self.remaining_requests == 0:
                 logging.debug('Nothing else to get. Stopping Octopus...')
                 self.stop()
 
@@ -163,7 +176,7 @@ class TornadoOctopus(object):
 
     def handle_wait_timeout(self, signal_number, frames):
         logging.debug('Timeout waiting for IOLoop to finish. Stopping IOLoop manually.')
-        self.ioloop.stop(force=True)
+        self.stop(force=True)
 
     def wait(self, timeout=10):
         self.last_timeout = timeout
@@ -177,12 +190,13 @@ class TornadoOctopus(object):
         else:
             logging.debug('Waiting for urls to be retrieved.')
 
+        logging.info('Starting IOLoop with %d URLs still left to process.' % self.remaining_requests)
         self.ioloop.start()
 
-    def stop(self, force=False):
-        logging.info('Stopping IOLoop...')
-        self.ioloop.stop()
+    @property
+    def remaining_requests(self):
+        return len(self.url_queue)
 
-        if not force and len(self.url_queue):
-            self.get_next_url()
-            self.wait(self.last_timeout)
+    def stop(self, force=False):
+        logging.info('Stopping IOLoop with %d URLs still left to process.' % self.remaining_requests)
+        self.ioloop.stop()

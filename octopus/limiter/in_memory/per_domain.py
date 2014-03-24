@@ -8,8 +8,11 @@ from octopus.limiter import Limiter as BaseLimiter
 
 
 class Limiter(BaseLimiter):
-    def __init__(self, *domains):
-        super(Limiter, self).__init__()
+    def __init__(self, limiter_miss_timeout_ms=None, *domains):
+        super(Limiter, self).__init__(limiter_miss_timeout_ms=limiter_miss_timeout_ms)
+        self.update_domain_definitions(*domains)
+
+    def update_domain_definitions(self, *domains):
         self.domains = domains
         self.domain_count = defaultdict(int)
 
@@ -31,7 +34,6 @@ class Limiter(BaseLimiter):
         domain = self.get_domain_from_url(url)
         if domain is None:
             logging.info('Tried to acquire lock to a domain that was not specified in the limiter (%s).' % url)
-            self.publish_lock_miss(url)
             return True
 
         limit = self.get_domain_limit(url)
@@ -40,7 +42,6 @@ class Limiter(BaseLimiter):
             self.domain_count[domain] += 1
             return True
 
-        self.publish_lock_miss(url)
         return False
 
     def release(self, url):

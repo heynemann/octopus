@@ -10,13 +10,22 @@ from octopus.limiter.in_memory.per_domain import Limiter as InMemoryPerDomainLim
 
 class Limiter(InMemoryPerDomainLimiter):
     def __init__(self, *domains, **kw):
-        super(InMemoryPerDomainLimiter, self).__init__()  # Skips InMemoryPerDomainLimiter constructor
+        limiter_miss_timeout_ms = None
+        if 'limiter_miss_timeout_ms' in kw:
+            limiter_miss_timeout_ms = kw['limiter_miss_timeout_ms']
+
+        # Skips InMemoryPerDomainLimiter constructor
+        super(InMemoryPerDomainLimiter, self).__init__(limiter_miss_timeout_ms=limiter_miss_timeout_ms)
 
         if not 'redis' in kw:
             raise RuntimeError('You must specify a connection to redis in order to use Redis Limiter.')
 
         self.redis = kw['redis']
         self.expiration_in_seconds = float(kw.get('expiration_in_seconds', 10))
+
+        self.update_domain_definitions(*domains)
+
+    def update_domain_definitions(self, *domains):
         self.domains = domains
         self.limiters = {}
 
@@ -38,7 +47,6 @@ class Limiter(InMemoryPerDomainLimiter):
         could_lock = self.limiters[domain].acquire_limit(url)
 
         if not could_lock:
-            self.publish_lock_miss(url)
             logging.info('Tried to acquire lock for %s but could not.' % url)
 
         return could_lock
