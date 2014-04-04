@@ -25,7 +25,7 @@ class TornadoOctopus(object):
             self, concurrency=10, auto_start=False, cache=False,
             expiration_in_seconds=30, request_timeout_in_seconds=10,
             connect_timeout_in_seconds=5, ignore_pycurl=False,
-            limiter=None):
+            limiter=None, allow_connection_reuse=True):
 
         self.concurrency = concurrency
         self.auto_start = auto_start
@@ -44,6 +44,9 @@ class TornadoOctopus(object):
         if PYCURL_AVAILABLE and not self.ignore_pycurl:
             logging.debug('pycurl is available, thus Octopus will be using it instead of tornado\'s simple http client.')
             AsyncHTTPClient.configure("tornado.curl_httpclient.CurlAsyncHTTPClient")
+            self.allow_connection_reuse = allow_connection_reuse
+        else:
+            self.allow_connection_reuse = True
 
         if auto_start:
             logging.debug('Auto starting...')
@@ -116,10 +119,15 @@ class TornadoOctopus(object):
             method=method,
             connect_timeout=self.connect_timeout_in_seconds,
             request_timeout=self.request_timeout_in_seconds,
+            prepare_curl_callback=self.handle_curl_callback,
             **kw
         )
 
         self.http_client.fetch(request, self.handle_request(url, handler))
+
+    def handle_curl_callback(self, curl):
+        if not self.allow_connection_reuse:
+            curl.setopt(pycurl.FRESH_CONNECT, 1)
 
     def get_next_url(self, request_url=None, handler=None, method=None, **kw):
         if request_url is None:
